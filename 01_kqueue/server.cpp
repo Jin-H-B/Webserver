@@ -21,7 +21,8 @@
 #define PORT 8080
 int main(void)
 {
-    int server_fd, new_socket;
+    int serverSocket;
+    int clientSocket;
     long valread;
     struct sockaddr_in address;
     int addrlen = sizeof(address);
@@ -31,7 +32,7 @@ int main(void)
     char const *msg = "HTTP/1.1 200 OK\nContent-Type: text/html; charset=utf-8\nContent-Length: 200\n\n<h1>Hello</h1><li>good time</li>";
 
     // Socket file descriptor
-    if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0)
+    if ((serverSocket = socket(AF_INET, SOCK_STREAM, 0)) == 0)
     {
 
         perror("In socket");
@@ -40,7 +41,7 @@ int main(void)
 
     // Socket resue address option
     int opt = 1;
-    setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+    setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
 
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
@@ -49,14 +50,14 @@ int main(void)
     memset(address.sin_zero, '\0', sizeof address.sin_zero);
 
     // FOR NON BLOCKING?
-    fcntl(server_fd, F_SETFL, O_NONBLOCK);
+    fcntl(serverSocket, F_SETFL, O_NONBLOCK);
 
-    if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0)
+    if (bind(serverSocket, (struct sockaddr *)&address, sizeof(address)) < 0)
     {
         perror("In bind");
         exit(EXIT_FAILURE);
     }
-    if (listen(server_fd, 10) < 0)
+    if (listen(serverSocket, 10) < 0)
     {
         perror("In listen");
         exit(EXIT_FAILURE);
@@ -77,7 +78,7 @@ int main(void)
 
     /* 서버 소켓에 대해 읽는 이벤트 등록 : 클라가 요청할 때 */
     //  EV_SET(&event, ident, filter, flags, fflags, data, udata);
-    EV_SET(&temp_event, server_fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
+    EV_SET(&temp_event, serverSocket, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
     change_list.push_back(temp_event);
 
     int new_events;
@@ -107,7 +108,7 @@ int main(void)
             curr_event = &event_list[i];
             if (curr_event->flags & EV_ERROR)
             {
-                if (curr_event->ident == server_fd)
+                if (curr_event->ident == serverSocket)
                 {
                     perror("server error : ");
                     exit(1);
@@ -121,34 +122,34 @@ int main(void)
 
             if (curr_event->filter == EVFILT_READ)
             {
-                /* server_fd의 읽기 이벤트 일때 */
-                if (curr_event->ident == server_fd)
+                /* serverSocket의 읽기 이벤트 일때 */
+                if (curr_event->ident == serverSocket)
                 {
-                    if ((new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t *)&addrlen)) < 0)
+                    if ((clientSocket = accept(serverSocket, (struct sockaddr *)&address, (socklen_t *)&addrlen)) < 0)
                     {
                         perror("In accept");
                         exit(EXIT_FAILURE);
                     }
-                    std::cout << "socket accepted : client : " << new_socket << std::endl;
+                    std::cout << "socket accepted : client : " << clientSocket << std::endl;
 
-                    fcntl(new_socket, F_SETFL, O_NONBLOCK);
+                    fcntl(clientSocket, F_SETFL, O_NONBLOCK);
 
-                    /* new_socket에 대해 읽는 이벤트 감지 등록 */
-                    EV_SET(&temp_event, new_socket, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
+                    /* clientSocket에 대해 읽는 이벤트 감지 등록 */
+                    EV_SET(&temp_event, clientSocket, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
                     change_list.push_back(temp_event);
-                    /* new_socket에 대해 쓰는 이벤트 감지 등록 */
-                    EV_SET(&temp_event, new_socket, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, NULL);
+                    /* clientSocket에 대해 쓰는 이벤트 감지 등록 */
+                    EV_SET(&temp_event, clientSocket, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, NULL);
                     change_list.push_back(temp_event);
                 }
 
                 /* 연결된 소켓의 읽기 이벤트 일때 */
-                if (curr_event->ident == new_socket)
+                if (curr_event->ident == clientSocket)
                 {
                     // system("netstat -an | grep 8080");
                     printf("-----------------------\n");
                     char buffer[30000] = {0};
                     // while()
-                    valread = read(new_socket, buffer, 30000);
+                    valread = read(clientSocket, buffer, 30000);
                     std::cout << "From clinet : " << buffer << std::endl;
                     system("netstat -an | grep 8080");
                 }
@@ -158,9 +159,9 @@ int main(void)
             {
                 printf("------------------message sending-------------------\n");
                 std::cout << "server is sending a msg" << std::endl;
-                write(new_socket, msg, strlen(msg));
+                write(clientSocket, msg, strlen(msg));
                 printf("------------------message sent-------------------\n");
-                // close(new_socket);
+                // close(clientSocket);
             }
 
             std::cout << "\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n"
