@@ -6,9 +6,6 @@
 #include "Config.hpp"
 #include "Define.hpp"
 
-#define IP_ADDRESS "0.0.0.0" //let OS choose default ip address
-#define PORT 8080
-
 class Config;
 
 int main()
@@ -23,5 +20,3 @@ int main()
 
 	return (0);
 }
-
-

@@ -17,13 +17,12 @@ Response::responseToClient(int clientSocket, InfoServer &serverInfo)
 	long valWrite = write(clientSocket, resMsg.c_str(), resMsg.size());
 	if (valWrite == (long)resMsg.size())
 		std::cout << "SERVER RESPONSE SENT\n";
+	close(clientSocket);
 }
 
 std::string
 Response::makeResponseMsg()
 {
-	std::string htmlMsg = "<!DOCTYPE html><html lang=\"en\"><body><h1> Webserv </h1><h2> Hello from Server </h2></body></html>";
-	std::ostringstream ss;
-	ss << "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: " << htmlMsg.size() << "\r\n" << htmlMsg;
-	return (ss.str());
+	std::string htmlMsg = "HTTP/1.1 200 OK\nContent-Type: text/html; charset=utf-8\nContent-Length: 200\n\n<h1>Hello</h1><img src=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==\" alt=\"Red dot\" />";
+	return (htmlMsg);
 }
