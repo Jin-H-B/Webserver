@@ -1,5 +1,5 @@
 /***************************************************/
-/* CODED BY JHBANG ================================*/
+/* CODED BY JIBANG ================================*/
 /***************************************************/
 
 #ifndef CONFIG_HPP
@@ -8,7 +8,7 @@
 #include <iostream>
 #include <string>
 
-#include <Define.hpp>
+#include "Define.hpp"
 
 class Config
 {
