@@ -1,5 +1,5 @@
 /***************************************************/
-/* CODED BY JIBANG ================================*/
+/* CODED BY JIN H. BANG ===========================*/
 /***************************************************/
 
 #ifndef MULTIPLEX_HPP
@@ -13,19 +13,6 @@
 /***************************************/
 
 /* Multiplex *///-----------------------
-// class Multiplex;
-
-// void
-// Multiplex::declareKqueue();
-// void
-// Multiplex::enrollEventToChangeList(uintptr_t ident, int16_t filter, uint16_t flags, uint32_t fflags, intptr_t data, void* udata);
-// int
-// Multiplex::senseEvents();
-// void
-// Multiplex::clearChangeList();
-// struct kevent const *
-// Multiplex::getEventList() const;
-
 class Multiplex
 {
 	private:
