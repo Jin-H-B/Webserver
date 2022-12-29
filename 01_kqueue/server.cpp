@@ -95,8 +95,8 @@ int main(void)
         }
 
         std::cout << "new_events sensed : " << new_events << std::endl; // check new_events
-        // event_list에 이벤트 담겼으므로 change_list는 비워줌
-        change_list.clear(); // clear change_list for new changes
+
+        // change_list.clear(); // clear change_list for new changes
 
         printf("\n========== Waiting for new connection ==========\n\n");
         system("netstat -an | grep 8080");
