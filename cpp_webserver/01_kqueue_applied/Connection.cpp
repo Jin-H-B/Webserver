@@ -27,15 +27,15 @@ Connection::connectionLoop(InfoServer &serverInfo)
 		{
 
 			currEvent = const_cast<struct kevent const *>(&(_eventManager.getEventList()[i]));
-
+			// std::cout << "	currEvent fd : " << currEvent->ident << "\n";
 			/* error case */
-			if (currEvent->flags & EV_ERROR && errno != EAGAIN) {
-				if (currEvent->ident == static_cast<unsigned long>(serverInfo._serverSocket))
+			if (currEvent->flags & EV_ERROR) {
+				if (currEvent->ident == static_cast<uintptr_t>(serverInfo._serverSocket))
 				{
 					std::cerr << "server error : \n";
 					break ;
 				}
-				else if (currEvent->ident == static_cast<unsigned long>(_clientSocket))
+				else if (currEvent->ident == static_cast<uintptr_t>(_clientSocket))
 				{
 					std::cerr << "client error : \n";
 					close(currEvent->ident);
@@ -43,32 +43,40 @@ Connection::connectionLoop(InfoServer &serverInfo)
 			}
 
 			/* read event */
-			if (currEvent->flags & EVFILT_READ)
+			else if (currEvent->filter & EVFILT_READ)
 			{
-				_clientSocket = accept(serverInfo._serverSocket, (sockaddr *)&serverInfo._serverAddr, &serverInfo._serverAddrLen);
-				if (_clientSocket == FAIL)
+				if (currEvent->ident == static_cast<uintptr_t>(serverInfo._serverSocket))
 				{
-					std::cerr << "Client connection error\n";
-					break;
+					_clientSocket = accept(serverInfo._serverSocket, (sockaddr *)&serverInfo._serverAddr, &serverInfo._serverAddrLen);
+					// std::cout << "	accept client socket : " << _clientSocket << "\n";
+					if (_clientSocket == FAIL)
+					{
+						std::cerr << "Client connection error\n";
+						break;
+					}
+					fcntl(_clientSocket, F_SETFL, O_NONBLOCK);
+					_eventManager.enrollEventToChangeList(_clientSocket, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
+					_eventManager.enrollEventToChangeList(_clientSocket, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, NULL);
 				}
-
-				if (fcntl(_clientSocket, F_SETFL, O_NONBLOCK) == FAIL) {
-					//throw execption, and send client 5XX
-				}
-
-				char buffer[BUFFER_SIZE] = {0};
-				int valRead = read(_clientSocket, buffer, BUFFER_SIZE);
-				if(valRead == FAIL && errno != EAGAIN)
+				else
 				{
-					std::cerr << "Read error";
-					break;
+					char buffer[BUFFER_SIZE];
+					int valRead = read(currEvent->ident, buffer, sizeof(buffer));
+					if (valRead == FAIL)
+					{
+						std::cerr << "Read error";
+						exit(1);
+					}
+					else
+					{
+						buffer[valRead] = '\0';
+						std::cout << "Received data from " << currEvent->ident << ": " << buffer << "\n";
+					}
 				}
-				_eventManager.enrollEventToChangeList(_clientSocket, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
-				_eventManager.enrollEventToChangeList(_clientSocket, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, NULL);
 			}
 
 			/* write event */
-			if (currEvent->flags & EVFILT_WRITE)
+			else if (currEvent->filter & EVFILT_WRITE)
 			{
 				Response responser;
 				responser.responseToClient(_clientSocket, serverInfo);
