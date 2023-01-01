@@ -53,12 +53,12 @@ Connection::connectionLoop()
 			}
 
 			/* read event */
-			if (currEvent->flags & EVFILT_READ)
+			else if (currEvent->filter & EVFILT_READ)
 			{
 				if (_serverMap.find(currEvent->ident) != _serverMap.end())
 				{
 					int clientSocket = accept(currEvent->ident, (sockaddr *)&_serverMap[currEvent->ident]._serverAddr, &_serverMap[currEvent->ident]._serverAddrLen);
-					std::cout << "	accepted client socket : " << clientSocket << "\n"; // test code
+					// std::cout << "	accepted client socket : " << clientSocket << "\n"; // test code
 					if (clientSocket == FAIL){
 						std::cerr << " Error : accept() \n";
 						throw ConnectionError();}
@@ -77,25 +77,29 @@ Connection::connectionLoop()
 					_clientMap.insert(std::pair<int, InfoClient>(clientSocket, infoClient));
 				}
 
-				if (_clientMap.find(currEvent->ident) != _clientMap.end()) {
+				else if (_clientMap.find(currEvent->ident) != _clientMap.end()) {
 					char buffer[BUFFER_SIZE] = {0};
 
-					std::cout << "	clientMap size : " << _clientMap.size() << "\n";
+					// std::cout << "	clientMap size : " << _clientMap.size() << "\n";
 
-					int valRead = read(currEvent->ident, buffer, BUFFER_SIZE);
+					int valRead = read(currEvent->ident, buffer, sizeof(buffer));
 					if (valRead == FAIL)// && errno != EAGAIN)
 					{
-						std::cerr << " from client " << currEvent->ident ;
-						std::cerr << " Error : read() \n";
+						// std::cerr << " from client " << currEvent->ident ;
+						// std::cerr << " Error : read() \n";
 						// throw ConnectionError();
 					}
-					std::cout << buffer << "\n";
-					_clientMap[currEvent->ident].reqMsg = buffer;
+					else
+					{
+						buffer[valRead] = '\0';
+						std::cout << "Received data from " << currEvent->ident << ": " << buffer << "\n";
+						_clientMap[currEvent->ident].reqMsg = buffer;
+					}
 				}
 			}
 
 			/* write event */
-			if (currEvent->flags & EVFILT_WRITE)
+			else if (currEvent->filter & EVFILT_WRITE)
 			{
 				if (_clientMap.find(currEvent->ident) != _clientMap.end()) {
 					Response responser;
