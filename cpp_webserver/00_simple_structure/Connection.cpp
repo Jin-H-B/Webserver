@@ -29,6 +29,7 @@ Connection::connectionLoop(InfoServer &serverInfo)
 		if (valRead == FAIL) {
 			std::cerr << "Read error";
 		}
+		std::cout << "	from client : " << buffer << "\n";
 
 		Response responser;
 		responser.responseToClient(_clientSocket, serverInfo);
