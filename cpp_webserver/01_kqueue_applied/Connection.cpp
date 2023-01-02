@@ -3,8 +3,7 @@
 /***************************************************/
 
 #include "Connection.hpp"
-#include <cstdio>
-#include <err.h>
+
 class Response;
 
 Connection::Connection()
@@ -18,30 +17,30 @@ Connection::connectionLoop(InfoServer &serverInfo)
 {
 	_eventManager.declareKqueue();
 	_eventManager.enrollEventToChangeList(serverInfo._serverSocket, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
+
 	int eventsNum = 0;
 	struct kevent const *currEvent = nullptr;
+
 	while (true)
 	{
 		eventsNum = _eventManager.senseEvents();
 		_eventManager.clearChangeList();
 		for (int i = 0; i < eventsNum; ++i)
 		{
-
 			currEvent = const_cast<struct kevent const *>(&(_eventManager.getEventList()[i]));
 			// std::cout << "	currEvent fd : " << currEvent->ident << "\n";
 			/* error case */
 			if (currEvent->flags & EV_ERROR) {
 				if (currEvent->ident == static_cast<uintptr_t>(serverInfo._serverSocket))
 				{
-					std::cerr << "server error : \n";
+					std::cerr << "server error\n";
 					break ;
 				}
-				else if (currEvent->ident == static_cast<uintptr_t>(_clientSocket))
+				else
 				{
-					printf("err: %s\n", strerror(currEvent->data));
-					printf("where fd was: %lu\n", currEvent->ident);
-					std::cerr << "client error : \n";
+					std::cerr << "client error\n";
 					close(currEvent->ident);
+					_clientsMap.erase(currEvent->ident);
 				}
 			}
 
@@ -50,35 +49,37 @@ Connection::connectionLoop(InfoServer &serverInfo)
 			{
 				if (currEvent->ident == static_cast<uintptr_t>(serverInfo._serverSocket))
 				{
-					_clientSocket = accept(serverInfo._serverSocket, (sockaddr *)&serverInfo._serverAddr, &serverInfo._serverAddrLen);
-					// std::cout << "	accept client socket : " << _clientSocket << "\n";
-					if (_clientSocket == FAIL)
+					int clientSocket = -1;
+					clientSocket = accept(serverInfo._serverSocket, (sockaddr *)&serverInfo._serverAddr, &serverInfo._serverAddrLen);
+					// std::cout << "	accept client socket : " << clientSocket << "\n";
+					if (clientSocket == FAIL)
 					{
 						std::cerr << "Client connection error\n";
 						break;
 					}
-					if (fcntl(_clientSocket, F_SETFL, O_NONBLOCK) == -1) {
-						err(1, "fcntl");
-					}
-
-					_eventManager.enrollEventToChangeList(_clientSocket, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
-					// something to write
-
-					_eventManager.enrollEventToChangeList(_clientSocket, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, NULL);
+					fcntl(clientSocket, F_SETFL, O_NONBLOCK);
+					_eventManager.enrollEventToChangeList(clientSocket, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
+					_eventManager.enrollEventToChangeList(clientSocket, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, NULL);
+					_clientsMap.insert(std::pair<int, std::string>(clientSocket, ""));
 				}
-				else
+				else if (_clientsMap.find(currEvent->ident)!= _clientsMap.end())
 				{
-					char buffer[BUFFER_SIZE];
+					// char buffer[BUFFER_SIZE];
+					char buffer[1];
 					int valRead = read(currEvent->ident, buffer, sizeof(buffer));
-					if (valRead == FAIL)
+					if (valRead <= 0)
 					{
-						std::cerr << "Read error";
-						exit(1);
+						if (valRead < 0) {
+							std::cerr << "Read error";
+						}
+						close(currEvent->ident);
+						_clientsMap.erase(currEvent->ident);
 					}
 					else
 					{
 						buffer[valRead] = '\0';
-						std::cout << "Received data from " << currEvent->ident << ": " << buffer << "\n";
+						_clientsMap[currEvent->ident] += buffer;
+						std::cout << "Received data from " << currEvent->ident << ": " << _clientsMap[currEvent->ident] << "\n";
 					}
 				}
 			}
@@ -86,11 +87,12 @@ Connection::connectionLoop(InfoServer &serverInfo)
 			/* write event */
 			else if (currEvent->filter == EVFILT_WRITE)
 			{
-				Response responser;
-				responser.responseToClient(_clientSocket, serverInfo);
+				std::map<int, std::string>::iterator it = _clientsMap.find(currEvent->ident);
+				if (it != _clientsMap.end()) {
+					Response responser;
+					responser.responseToClient(currEvent->ident, serverInfo);
+				}
 			}
-			break;
 		}
-
 	}
 }
