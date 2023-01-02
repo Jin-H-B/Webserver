@@ -38,16 +38,17 @@ Connection::connectionLoop()
 			currEvent = const_cast<struct kevent const *>(&(_eventManager.getEventList()[i]));
 
 			/* error case */
-			if ((currEvent->flags & EV_ERROR || currEvent->flags & EV_EOF)) {
+			if (currEvent->flags & EV_ERROR) {
 				if (_serverMap.find(currEvent->ident) != _serverMap.end()) {
-					close(currEvent->ident);
+					// close(currEvent->ident);
 					std::cerr << " server error case \n";
 					throw ConnectionError();
 				}
 				else if (_clientMap.find(currEvent->ident) != _clientMap.end())
 				{
-					close(currEvent->ident);
 					std::cerr << " client error case \n";
+					close(currEvent->ident);
+					_clientMap.erase(currEvent->ident);
 					throw ConnectionError();
 				}
 			}
@@ -75,11 +76,12 @@ Connection::connectionLoop()
 					infoClient._clientSocket = clientSocket;
 					infoClient._server = &_serverMap[currEvent->ident];
 					_clientMap.insert(std::pair<int, InfoClient>(clientSocket, infoClient));
+					_clientMap[clientSocket].reqMsg = "";
 				}
 
 				else if (_clientMap.find(currEvent->ident) != _clientMap.end()) {
-					char buffer[BUFFER_SIZE] = {0};
-
+					// char buffer[BUFFER_SIZE] = {0};
+					char buffer[2] = {0};
 					// std::cout << "	clientMap size : " << _clientMap.size() << "\n";
 
 					int valRead = read(currEvent->ident, buffer, sizeof(buffer));
@@ -87,13 +89,15 @@ Connection::connectionLoop()
 					{
 						std::cerr << " from client " << currEvent->ident ;
 						std::cerr << " Error : read() \n";
-						throw ConnectionError();
+						//send error page
+						close(currEvent->ident);
+						_clientMap.erase(currEvent->ident);
 					}
 					else
 					{
 						buffer[valRead] = '\0';
-						std::cout << "Received data from " << currEvent->ident << ": " << buffer << "\n";
-						_clientMap[currEvent->ident].reqMsg = buffer;
+						_clientMap[currEvent->ident].reqMsg += buffer;
+						std::cout << "Received requset from " << currEvent->ident << ": " << _clientMap[currEvent->ident].reqMsg << "\n";
 					}
 				}
 			}
@@ -101,9 +105,15 @@ Connection::connectionLoop()
 			/* write event */
 			else if (currEvent->filter == EVFILT_WRITE)
 			{
-				if (_clientMap.find(currEvent->ident) != _clientMap.end()) {
+				std::map<int, InfoClient>::iterator it = _clientMap.find(currEvent->ident);
+				if (it != _clientMap.end()) {
 					Response responser;
-					responser.responseToClient(currEvent->ident, _clientMap[currEvent->ident]);
+					if (it->second.reqMsg == "GET")
+					{
+						// parsing needed
+						it->second.reqMsg = "";
+						responser.responseToClient(currEvent->ident, _clientMap[currEvent->ident]);
+					}
 				}
 			}
 		}
