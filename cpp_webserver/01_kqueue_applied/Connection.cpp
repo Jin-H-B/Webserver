@@ -3,7 +3,8 @@
 /***************************************************/
 
 #include "Connection.hpp"
-
+#include <cstdio>
+#include <err.h>
 class Response;
 
 Connection::Connection()
@@ -37,13 +38,15 @@ Connection::connectionLoop(InfoServer &serverInfo)
 				}
 				else if (currEvent->ident == static_cast<uintptr_t>(_clientSocket))
 				{
+					printf("err: %s\n", strerror(currEvent->data));
+					printf("where fd was: %lu\n", currEvent->ident);
 					std::cerr << "client error : \n";
 					close(currEvent->ident);
 				}
 			}
 
 			/* read event */
-			else if (currEvent->filter & EVFILT_READ)
+			else if (currEvent->filter == EVFILT_READ)
 			{
 				if (currEvent->ident == static_cast<uintptr_t>(serverInfo._serverSocket))
 				{
@@ -54,8 +57,13 @@ Connection::connectionLoop(InfoServer &serverInfo)
 						std::cerr << "Client connection error\n";
 						break;
 					}
-					fcntl(_clientSocket, F_SETFL, O_NONBLOCK);
+					if (fcntl(_clientSocket, F_SETFL, O_NONBLOCK) == -1) {
+						err(1, "fcntl");
+					}
+
 					_eventManager.enrollEventToChangeList(_clientSocket, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
+					// something to write
+
 					_eventManager.enrollEventToChangeList(_clientSocket, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, NULL);
 				}
 				else
@@ -76,11 +84,13 @@ Connection::connectionLoop(InfoServer &serverInfo)
 			}
 
 			/* write event */
-			else if (currEvent->filter & EVFILT_WRITE)
+			else if (currEvent->filter == EVFILT_WRITE)
 			{
 				Response responser;
 				responser.responseToClient(_clientSocket, serverInfo);
 			}
+			break;
 		}
+
 	}
 }
