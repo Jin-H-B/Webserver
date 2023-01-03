@@ -2,10 +2,13 @@
 
 For building a fully operating mini-webserver.
 This project is a team-work.
+<br>
 webserver connection part = up to me
+<br>
 server config parser = up to kyulim
+<br>
 request parser = up to nttmxk
-
+<br>
 Config class defines server config;
 HttpServer class defines server creation and inlcudes the whloe logic of server;
 
