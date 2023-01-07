@@ -69,7 +69,6 @@ Connection::connectionLoop()
 						throw ConnectionError();}
 
 					_eventManager.enrollEventToChangeList(clientSocket, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
-					_eventManager.enrollEventToChangeList(clientSocket, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, NULL);
 
 					_serverMap[currEvent->ident]._clients.push_back(clientSocket);
 					InfoClient infoClient; // need to be initialized
@@ -93,11 +92,18 @@ Connection::connectionLoop()
 						close(currEvent->ident);
 						_clientMap.erase(currEvent->ident);
 					}
-					else
+					else if (valRead > 0)
 					{
 						buffer[valRead] = '\0';
-						_clientMap[currEvent->ident].reqMsg += buffer;
-						std::cout << "Received requset from " << currEvent->ident << ": " << _clientMap[currEvent->ident].reqMsg << "\n";
+						_clientMap[currEvent->ident].req.parseMessage(buffer);
+						if (_clientMap[currEvent->ident].req.t_result.pStatus != Request::pComplete && _clientMap[currEvent->ident].req.t_result.pStatus != Request::pError) {
+							_clientMap[currEvent->ident].reqMsg.assign(BUFFER_SIZE, 0);
+						}
+						else if (_clientMap[currEvent->ident].req.t_result.pStatus == Request::pComplete)
+						{
+							_clientMap[currEvent->ident].req.printRequest();
+							_eventManager.enrollEventToChangeList(currEvent->ident, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, NULL);
+						}
 					}
 				}
 			}
@@ -108,12 +114,7 @@ Connection::connectionLoop()
 				std::map<int, InfoClient>::iterator it = _clientMap.find(currEvent->ident);
 				if (it != _clientMap.end()) {
 					Response responser;
-					// if (it->second.reqMsg == "GET")
-					{
-						// parsing needed
-						it->second.reqMsg = "";
-						responser.responseToClient(currEvent->ident, _clientMap[currEvent->ident]);
-					}
+					responser.responseToClient(currEvent->ident, _clientMap[currEvent->ident]);
 				}
 			}
 		}
