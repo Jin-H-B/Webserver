@@ -42,6 +42,7 @@ public:
 		bool close;
 		std::map<std::string, std::string> header;
 		std::string body;
+		std::string target;
 		std::string path; // target = (host) + path + query
 		std::string query;
 		std::string host;

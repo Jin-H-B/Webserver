@@ -21,3 +21,7 @@ HttpServer class defines server creation and inlcudes the whloe logic of server;
 ```
 webServer.openServer() : socket() + bind() + listen();
 webServer.runServer() : accept() + read() + write();
+
+<br>
+<br>
+Only GET method(/home and /hello)

@@ -70,6 +70,7 @@ void	Request::parseRequestLine()
 
 	pos = mControl.find(SP);
 	_target = mControl.substr(0, pos);
+	t_result.target = _target;
 	_version = mControl.erase(0, pos + 1);
 
 	checkTarget();
