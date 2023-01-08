@@ -115,6 +115,8 @@ Connection::connectionLoop()
 				if (it != _clientMap.end()) {
 					Response responser;
 					responser.responseToClient(currEvent->ident, _clientMap[currEvent->ident]);
+					close(currEvent->ident);
+					_clientMap.erase(currEvent->ident);
 				}
 			}
 		}
