@@ -16,4 +16,10 @@
 
 #define NONE -1
 
+enum {
+	GET,
+	POST,
+	DELETE
+};
+
 #endif

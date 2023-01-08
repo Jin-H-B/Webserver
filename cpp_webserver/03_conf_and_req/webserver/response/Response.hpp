@@ -14,7 +14,8 @@ class Response : public HttpResInfo
 {
 	public:
 		void responseToClient(int clientSocket, InfoClient infoClient);
-		std::string makeResponseMsg();
+		std::string makeResponseGET();
+		std::string makeResponseERR();
 		// std::string httpRes2XX();
 		// std::string httpRes3XX();
 		// std::string httpRes4XX();

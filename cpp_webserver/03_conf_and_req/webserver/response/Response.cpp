@@ -7,7 +7,16 @@
 void
 Response::responseToClient(int clientSocket, InfoClient infoClient)
 {
-	std::string resMsg = makeResponseMsg();
+	std::string resMsg = "";
+	if (infoClient.req.t_result.method == GET)
+	{
+		resMsg = makeResponseGET();
+	}
+	else
+	{
+		resMsg = makeResponseERR();
+	}
+
 	(void)infoClient; // to be used
 
 	std::cout << " response to client : " << clientSocket << "\n";
@@ -18,7 +27,7 @@ Response::responseToClient(int clientSocket, InfoClient infoClient)
 }
 
 std::string
-Response::makeResponseMsg()
+Response::makeResponseGET()
 {
 	std::stringstream httpRes;
 
@@ -38,19 +47,10 @@ Response::makeResponseMsg()
 	return (htmlMsg);
 }
 
-
-// std::string
-// Response::httpRes2XX()
-// {}
-
-// std::string
-// Response::httpRes3XX()
-// {}
-
-// std::string
-// Response::httpRes4XX()
-// {}
-
-// std::string
-// Response::httpRes500()
-// {}
+std::string
+Response::makeResponseERR()
+{
+	std::stringstream httpRes;
+	std::string htmlMsg = "HTTP/1.1 400 Bad Request\nContent-Type: text/html; charset=utf-8\nContent-Length: 200\n\n<h1>ERROR</h1><img src=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==\" alt=\"Red dot\" />";
+	return (htmlMsg);
+}
