@@ -83,7 +83,7 @@ Connection::connectionLoop()
 
 				else if (_clientMap.find(currEvent->ident) != _clientMap.end()) {
 					// char buffer[BUFFER_SIZE] = {0};
-					char buffer[2] = {0};
+					char buffer[1024] = {0};
 					// std::cout << "	clientMap size : " << _clientMap.size() << "\n";
 
 					int valRead = read(currEvent->ident, buffer, sizeof(buffer));

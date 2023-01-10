@@ -9,8 +9,8 @@ server config parser = up to kyulim
 <br>
 request parser = up to nttmxk
 <br>
-Config class defines server config;
-HttpServer class defines server creation and inlcudes the whloe logic of server;
+Config class defines server config; <br>
+HttpServer class defines server creation and inlcudes the whloe logic of server; <br>
 
 ```
 	if (webServer.openServer() == FAIL)
@@ -19,11 +19,12 @@ HttpServer class defines server creation and inlcudes the whloe logic of server;
 	if (webServer.runServer() == FAIL) //runServer() includes Connection class methods
 		return (1);
 ```
-webServer.openServer() : socket() + bind() + listen();
-webServer.runServer() : accept() + read() + write();
+webServer.openServer() : socket() + bind() + listen(); <br>
+webServer.runServer() : accept() + read() + write(); <br>
 
 <br>
 <h2> GET </h2>
-/home : index.html
-/server : server.html
+/home : index.html <br>
+/server : server.html <br>
+/submit : cgi request => use pyinstaller to create submit execfile in www/cgi-bin
 

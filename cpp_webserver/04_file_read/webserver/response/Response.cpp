@@ -13,6 +13,35 @@ Response::responseToClient(int clientSocket, InfoClient infoClient)
 		resMsg = makeResponseGET(infoClient);
 		std::cout << "		------result msg------- : \n" << resMsg << "\n";
 	}
+	else if (infoClient.req.t_result.method == POST)
+	{
+		char cwd[1024];
+		getcwd(cwd, 1024);
+		std::string cwdPath(cwd);
+		std::string fullPath = cwdPath + "/www/cgi-bin/submit";
+		std::string filePath = cwdPath + "/submit.html";
+		int pid = fork();
+		waitpid(pid, NULL, 0);
+		if (pid == 0)
+		{
+			int fd = open(filePath.c_str(), O_WRONLY | O_CREAT, 0644);
+			dup2(fd, STDOUT_FILENO);
+			char **args = new char *[sizeof(char *) * 3];
+			args[0] = strdup(fullPath.c_str());
+			args[1] = strdup(infoClient.req.t_result.body.c_str());
+			args[2] = NULL;
+			execve(fullPath.c_str(), args, NULL);
+		}
+		else
+		{
+			resMsg = resMsgHeader(infoClient) + "\n" + resMsgBody(filePath);
+			std::cout << " response to client : " << clientSocket << "\n";
+			long valWrite = write(clientSocket, resMsg.c_str(), resMsg.size());
+			if (valWrite == (long)resMsg.size())
+				std::cout << "SERVER RESPONSE SENT\n";
+			return ;
+		}
+	}
 	else
 	{
 		resMsg = makeResponseERR();
@@ -35,9 +64,10 @@ Response::makeResponseGET(InfoClient &infoClient)
 	std::string cwdPath(cwd);
 	if (infoClient.req.t_result.target == "/home" || infoClient.req.t_result.target == "/")
 		resMsg = resMsgHeader(infoClient) + "\n" + resMsgBody(cwdPath + "/resource/static/index.html");
-
-	if (infoClient.req.t_result.target == "/hello")
+	if (infoClient.req.t_result.target == "/server")
 		resMsg = resMsgHeader(infoClient) + "\n" + resMsgBody(cwdPath + "/resource/static/server.html");
+	if (infoClient.req.t_result.target == "/submit")
+		resMsg = resMsgHeader(infoClient) + "\n" + resMsgBody(cwdPath + "/resource/static/submit.html");
 	return (resMsg);
 }
 

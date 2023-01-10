@@ -31,6 +31,7 @@ void 		Request::updateStatus(int status, int pStatus) {
 void	Request::parseMessage(std::string message)
 {
 	_orig += message;
+	std::cout << _orig << std::endl;// for test
 	if (t_result.pStatus == pRequest)
 		parseRequestLine();
 	if (t_result.pStatus == pHeader)
