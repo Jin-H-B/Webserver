@@ -26,5 +26,6 @@ webServer.runServer() : accept() + read() + write(); <br>
 <h2> GET </h2>
 /home : index.html <br>
 /server : server.html <br>
+<h2> POST </h2>
 /submit : cgi request => use pyinstaller to create submit execfile in www/cgi-bin
 
