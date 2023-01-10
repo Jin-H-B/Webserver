@@ -65,10 +65,12 @@ Response::makeResponseGET(InfoClient &infoClient)
 	std::string cwdPath(cwd);
 	if (infoClient.req.t_result.target == "/home" || infoClient.req.t_result.target == "/")
 		resMsg = resMsgHeader(infoClient) + "\n" + resMsgBody(cwdPath + "/resource/static/index.html");
-	if (infoClient.req.t_result.target == "/server")
+	else if (infoClient.req.t_result.target == "/server")
 		resMsg = resMsgHeader(infoClient) + "\n" + resMsgBody(cwdPath + "/resource/static/server.html");
-	if (infoClient.req.t_result.target == "/submit")
+	else if (infoClient.req.t_result.target == "/submit")
 		resMsg = resMsgHeader(infoClient) + "\n" + resMsgBody(cwdPath + "/resource/static/submit.html");
+	else
+		resMsg = makeResponseERR();
 	return (resMsg);
 }
 
@@ -76,7 +78,7 @@ std::string
 Response::makeResponseERR()
 {
 	std::stringstream httpRes;
-	std::string htmlMsg = "HTTP/1.1 400 Bad Request\nContent-Type: text/html; charset=utf-8\nContent-Length: 200\n\n<h1>ERROR</h1><img src=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==\" alt=\"Red dot\" />";
+	std::string htmlMsg = "HTTP/1.1 400 Not Found\nContent-Type: text/html; charset=utf-8\nContent-Length: 200\n\n<h1>ERROR</h1> <h2>404 NOT FOUND</h2>";
 	return (htmlMsg);
 }
 

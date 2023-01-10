@@ -89,9 +89,9 @@ Connection::connectionLoop()
 					int valRead = read(currEvent->ident, buffer, sizeof(buffer));
 					if (valRead == FAIL)
 					{
-						std::cerr << " from client " << currEvent->ident ;
+						std::cerr << " from client " << currEvent->ident;
 						std::cerr << " Error : read() \n";
-						//send error page
+						// send error page
 						close(currEvent->ident);
 						_clientMap.erase(currEvent->ident);
 					}
