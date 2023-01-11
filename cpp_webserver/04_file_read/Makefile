@@ -8,7 +8,8 @@ SRCS		=	main.cpp \
 				webserver/connection/Multiplex.cpp \
 				configParser/BaseServer.cpp \
 				configParser/Config.cpp \
-				parseRequest/Request.cpp
+				parseRequest/Request.cpp \
+				parseRequest/Uri.cpp
 
 OBJS		=	$(SRCS:.cpp=.o)
 

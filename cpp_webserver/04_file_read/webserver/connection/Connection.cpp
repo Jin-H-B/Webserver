@@ -74,11 +74,16 @@ Connection::connectionLoop()
 					InfoClient infoClient; // need to be initialized
 					infoClient._clientSocket = clientSocket;
 					infoClient._server = &_serverMap[currEvent->ident];
+
+					std::cout << "\n\nINSERT CLIENT : " << clientSocket << "\n";
+					std::cout << "SERVER : " << currEvent->ident << "\n\n";
+
 					_clientMap.insert(std::pair<int, InfoClient>(clientSocket, infoClient));
 					_clientMap[clientSocket].reqMsg = "";
 
 					Response responser;
 					_responserMap.insert(std::pair<int, Response>(clientSocket, responser));
+
 				}
 
 				else if (_clientMap.find(currEvent->ident) != _clientMap.end()) {
@@ -87,6 +92,7 @@ Connection::connectionLoop()
 					// std::cout << "	clientMap size : " << _clientMap.size() << "\n";
 
 					int valRead = read(currEvent->ident, buffer, sizeof(buffer));
+					// std::cout << "test :: " << buffer << "\n\n";
 					if (valRead == FAIL)
 					{
 						std::cerr << " from client " << currEvent->ident;
@@ -104,7 +110,13 @@ Connection::connectionLoop()
 						}
 						else if (_clientMap[currEvent->ident].req.t_result.pStatus == Request::pComplete)
 						{
+							std::cout << "\n\n\nREQUEST------\n";
+							std::cout << _clientMap[currEvent->ident].req.t_result.orig << "\n\n";
+							std::cout << "\n\n\nBODY-------\n";
+							std::cout << _clientMap[currEvent->ident].req.t_result.body << "\n";
+							std::cout << "\n\n\nPARSE-------\n";
 							_clientMap[currEvent->ident].req.printRequest();
+							std::cout << "\n\n\n";
 							_eventManager.enrollEventToChangeList(currEvent->ident, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, NULL);
 						}
 					}

@@ -1,5 +1,7 @@
 #ifndef REQUEST_HPP
 # define REQUEST_HPP
+
+# include "Uri.hpp"
 # include <iostream>
 # include <algorithm>
 # include <map>
@@ -13,7 +15,7 @@
 # define SIZE_MAX_HEADER 2048
 # define SIZE_MAX_HOST 128 // verifyhost
 # define SIZE_MAX_CHUNK 3 // hex FFF = dec 4095
-# define SIZE_MAX_BODY 8192
+# define SIZE_MAX_BODY 819200000
 
 /** Request class
  * author: jinoh
@@ -42,10 +44,12 @@ public:
 		bool close;
 		std::map<std::string, std::string> header;
 		std::string body;
-		std::string target;
-		std::string path; // target = (host) + path + query
-		std::string query;
 		std::string host;
+		std::string port;
+		std::string path;
+		std::string query;
+		std::string target;
+		std::string orig;
 	}	t_result;
 
 	void 		clearRequest();
@@ -59,11 +63,13 @@ public:
 	Request& operator=(const Request &orig);
 
 private:
-	std::string	_orig;
+
+	std::string	_buf;
 	std::string	_head;
 	std::string	_target;
 	std::string	_version;	// no need?
 	int 		_bodyLength;
+	bool		_chunkReady;
 	bool		_chunked;
 	void		parseRequestLine();
 	void 		checkMethod(std::string &mControl);
@@ -74,7 +80,6 @@ private:
 	void		parseHeader();
 	void		tokenizeHeader();
 	bool		isOWS(int c);
-	void		checkHeader();
 	void 		verifyHeader();
 	void 		checkHost();
 	void 		checkBodyLength();
