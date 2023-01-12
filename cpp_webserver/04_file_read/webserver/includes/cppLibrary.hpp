@@ -23,5 +23,6 @@
 #include <iterator>
 #include <sstream>
 #include <exception>
+#include <sys/stat.h>
 
 #endif

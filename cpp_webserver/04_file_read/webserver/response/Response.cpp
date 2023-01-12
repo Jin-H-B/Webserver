@@ -3,6 +3,7 @@
 /***************************************************/
 
 #include "Response.hpp"
+#include "CGI.hpp"
 
 void
 Response::responseToClient(int clientSocket, InfoClient infoClient)
@@ -28,39 +29,61 @@ Response::responseToClient(int clientSocket, InfoClient infoClient)
 		}
 		else if (infoClient.req.t_result.target == "/www/cgi-bin/upload.py")
 		{
-			std::cerr << "\n\nfor uploading \n\n";
 			execPath = cwdPath + "/www/cgi-bin/upload.py";
 			filePath = cwdPath + "/upload.html";
-			std::string uploadPath = cwdPath + "/text.txt";
-
-			std::cout << "\n\n" << uploadPath << "\n" << infoClient.req.t_result.body << "\n\n";
-			int upFd = open(uploadPath.c_str(), O_WRONLY | O_CREAT, 0744);
-			write(upFd, infoClient.req.t_result.body.c_str(), infoClient.req.t_result.body.size());
 		}
+
+		std::string tmpFilePath = cwdPath + "/tmp_" + std::to_string(clientSocket);
+
+		int upFd = open(tmpFilePath.c_str(), O_WRONLY | O_CREAT, 0744);
+		write(upFd, infoClient.req.t_result.body.c_str(), infoClient.req.t_result.body.size());
+
+		CGI cgi;
+		char **args = new char *[sizeof(char *) * 3];
+		args[0] = strdup("/opt/homebrew/bin/python3");
+		args[1] = strdup(execPath.c_str());
+		args[2] = NULL;
+		// args[2] = strdup(infoClient.req.t_result.body.c_str());
+		// args[3] = NULL;
+
+		cgi.initEnvMap(infoClient);
+		cgi.envMap.insert(std::pair<std::string, std::string>("UPLOAD_PATH", cwdPath));
+		cgi.envMap.insert(std::pair<std::string, std::string>("PATH_TRANSLATED", args[0]));
+		cgi.envMap.insert(std::pair<std::string, std::string>("SCRIPT_FILENAME", args[1]));
+
+		char **cgiEnv = new char *[sizeof(char *) * cgi.envMap.size() + 1]; // delete needed
+		cgiEnv[cgi.envMap.size()] = NULL;
+		int i = 0;
+		for (std::map<std::string, std::string>::iterator iter = cgi.envMap.begin(); iter != cgi.envMap.end(); ++iter)
+		{
+			cgiEnv[i] = strdup((iter->first + "=" + iter->second).c_str());
+			// std::cout << cgiEnv[i] << "\n";
+			i++;
+		}
+
+		int fds[2];
+		pipe(fds);
+		close(fds[0]);
+		dup2(fds[1], upFd);
 		int pid = fork();
 		waitpid(pid, NULL, 0);
 		if (pid == 0)
 		{
-			int fd = open(filePath.c_str(), O_WRONLY | O_CREAT, 0744);
-			dup2(fd, STDOUT_FILENO);
-			char **args = new char *[sizeof(char *) * 4];
-			args[0] = strdup("/opt/homebrew/bin/python3");
-			args[1] = strdup(execPath.c_str());
-			args[2] = strdup(infoClient.req.t_result.body.c_str());
-			args[3] = NULL;
+			close(fds[1]);
+			dup2(fds[0], STDIN_FILENO);
+			close(fds[0]);
+			int resFd = open(filePath.c_str(), O_WRONLY | O_CREAT, 0744);
+			dup2(resFd, STDOUT_FILENO);
 
-			// char **env = (char **)malloc(sizeof(char *) * 4);
-			// env[0] = strdup("REQUEST_METHOD=POST");
-			// env[1] = strdup("SERVER_PROTOCOL=HTTP/1.1");
-			// env[2] = strdup("PATH_INFO= ~~~ / ~~");
-			// env[3] = NULL;
 			execve("/opt/homebrew/bin/python3", args, NULL);
 			// execve(execPath.c_str(), args, NULL);
-			perror("execute failed!!");
-			exit(EXIT_FAILURE);
+			// perror("execute failed!!");
+			exit(EXIT_SUCCESS);
 		}
 		else
 		{
+			close(fds[1]);
+			close(upFd);
 			resMsg = resMsgHeader(infoClient) + "\n" + resMsgBody(filePath);
 			std::cout << " response to client : " << clientSocket << "\n";
 			long valWrite = write(clientSocket, resMsg.c_str(), resMsg.size());
@@ -123,7 +146,25 @@ Response::resMsgHeader(InfoClient &infoClient)
 		setConnection("close");
 	setContentType("text/html");
 	// setTransferEncoding("chunked");
-	setContentLength(1000);
+	struct stat st;
+	std::string resMsg;
+	char cwd[1024];
+	getcwd(cwd, 1024);
+	std::string cwdPath(cwd);
+	std::string file = "";
+	int contentLen = 0;
+	if (infoClient.req.t_result.target == "/home" || infoClient.req.t_result.target == "/")
+		file = cwdPath + "/resource/static/index.html";
+	else if (infoClient.req.t_result.target == "/server")
+		file = cwdPath + "/resource/static/server.html";
+	else if (infoClient.req.t_result.target == "/submit")
+		file = cwdPath + "/resource/static/submit.html";
+	else if (infoClient.req.t_result.target == "/upload")
+		file = cwdPath + "/resource/static/upload.html";
+	stat(file.c_str(), &st);
+	contentLen = st.st_size;
+	setContentLength(contentLen);
+	// std::cout << "\n\n============\n" << infoClient.req.t_result.contentLen << "\n===========\n\n";
 
 	header << getHttpVersion() << " " << getStatusCode() << " " << getStatusMsg() << CRLF;
 	header << "Content-Type: " << getContentType() << "; charset=utf-8" << CRLF;
