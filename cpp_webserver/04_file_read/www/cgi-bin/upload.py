@@ -9,6 +9,7 @@ content = content.split("\r\n")
 
 print("<html>")
 print("<body>")
+print("<div><a href=\"/home\">Go to index</a></div>")
 
 content_type = content[2]
 
