@@ -4,7 +4,9 @@
 
 #include "Response.hpp"
 #include "CGI.hpp"
-#include <iostream>
+#include <sys/types.h>
+#include <dirent.h>
+
 void Response::responseToClient(int clientSocket, InfoClient infoClient)
 {
 	char cwd[1024];
@@ -18,6 +20,31 @@ void Response::responseToClient(int clientSocket, InfoClient infoClient)
 		resMsg = makeResponseGET(infoClient);
 		std::cout << "		------result msg------- : \n"
 				  << resMsg << "\n";
+	}
+	else if (infoClient.req.t_result.method == DELETE)
+	{
+		int pid = fork();
+		if (pid == 0)
+		{
+			std::cerr << "\n\nTHIS IS DELETE METHOD \n\n";
+			std::string uploadPath = cwdPath + "/uploaded/";
+
+			/* all files delete in uploaded dir */
+			DIR *dir = opendir(uploadPath.c_str());
+			struct dirent *dirent = NULL;
+			while (true)
+			{
+				dirent = readdir(dir);
+				if (!dirent)
+					break;
+				// std::cout << dirent->d_name << "\n";
+				if (strcmp(dirent->d_name, ".") != 0 && strcmp(dirent->d_name, ".."))
+				{
+					std::string delPath = uploadPath + dirent->d_name;
+					unlink(delPath.c_str());
+				}
+			}
+		}
 	}
 	else if (infoClient.req.t_result.method == POST)
 	{
@@ -142,6 +169,8 @@ Response::makeResponseGET(InfoClient &infoClient)
 		resMsg = resMsgHeader(infoClient) + "\n" + resMsgBody(cwdPath + "/resource/static/submit.html");
 	else if (infoClient.req.t_result.target == "/upload")
 		resMsg = resMsgHeader(infoClient) + "\n" + resMsgBody(cwdPath + "/resource/static/upload.html");
+	else if (infoClient.req.t_result.target == "/delete")
+		resMsg = resMsgHeader(infoClient) + "\n" + resMsgBody(cwdPath + "/resource/static/delete.html");
 	else
 		resMsg = makeResponseERR();
 	return (resMsg);
@@ -185,6 +214,8 @@ Response::resMsgHeader(InfoClient &infoClient)
 			file = cwdPath + "/resource/static/submit.html";
 		else if (infoClient.req.t_result.target == "/upload")
 			file = cwdPath + "/resource/static/upload.html";
+		else if (infoClient.req.t_result.target == "/delete")
+			file = cwdPath + "/resource/static/delete.html";
 	}
 	else if (infoClient.req.t_result.method == POST)
 	{
@@ -194,6 +225,7 @@ Response::resMsgHeader(InfoClient &infoClient)
 		else if (infoClient.req.t_result.target == "/www/cgi-bin/upload.py")
 			file = cwdPath + "/upload_out.html";
 	}
+
 	std::cout << "\n\nresponse file : " << file << "  \n\n";
 	stat(file.c_str(), &st);
 	contentLen = st.st_size;

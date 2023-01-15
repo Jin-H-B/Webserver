@@ -7,13 +7,14 @@
 	<title>Little Webserver</title>
 </head>
 <body>
-	<h1>Home</h1>
-	<div>
-		This is little web servers' home
-	</div>
-	<div><a href="/server">server</a></div>
-	<div><a href="/submit">submit </a></div>
-	<div><a href="/upload">upload</a></div>
-	<div><a href="/delete">delete</a></div>
+	<div><a href="/home">Go to index</a></div>
+	<button onclick="deleteResource('uploaded/')">Delete</button>
+	<script>
+		function deleteResource(url) {
+			fetch(url, {
+			  method: 'DELETE'
+			});
+		  }
+	</script>
 </body>
 </html>

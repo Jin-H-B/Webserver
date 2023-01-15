@@ -12,7 +12,7 @@ form_data = urllib.parse.parse_qs(post_data)
 
 print("<html>")
 print("<body>")
-
+print("<div><a href=\"/home\">Go to index</a></div>")
 # Print the contents of the POST request
 print("<div>POST Data:</div>")
 print("<div>")
