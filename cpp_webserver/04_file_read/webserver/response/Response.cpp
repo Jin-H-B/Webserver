@@ -44,11 +44,12 @@ void Response::responseToClient(int clientSocket, InfoClient infoClient)
 		// args[0] = strdup(execPath.c_str());
 		// args[1] = NULL;
 		char *args[2] = {strdup(execPath.c_str()), NULL};
-		// std::cerr << "\n===CEHCK1 === \n";///
+
 		/* cgi env setting */
 		CGI cgi;
 		cgi.initEnvMap(infoClient);
-		cgi.envMap.insert(std::pair<std::string, std::string>("UPLOAD_PATH", cwdPath));
+
+		cgi.envMap.insert(std::pair<std::string, std::string>("UPLOAD_PATH", cwdPath + "/uploaded/"));
 		cgi.envMap.insert(std::pair<std::string, std::string>("PATH_TRANSLATED", args[0]));
 
 		// char **cgiEnv = new char *[sizeof(char *) * cgi.envMap.size() + 1]; // delete needed
@@ -61,12 +62,12 @@ void Response::responseToClient(int clientSocket, InfoClient infoClient)
 			// std::cout << cgiEnv[i] << "\n";
 			i++;
 		}
-		// std::cerr << "\n===CEHCK2 === \n";///
+
 		int fds[2];
 		pipe(fds);
 
 		int pid = fork();
-		// std::cerr << "\n===CEHCK3 === \n";///
+
 		if (pid == 0)
 		{
 			// std::cerr << "CHILD" << std::endl;
@@ -91,7 +92,8 @@ void Response::responseToClient(int clientSocket, InfoClient infoClient)
 			// std::cerr << "OPEN" << std::endl;
 			int n = read(tmpFd, buff, sizeof(buff));
 			close(tmpFd);
-			// std::cerr << "\n===CEHCK4 === \n";///
+			unlink(tmpFilePath.c_str()); // if you want to check tmpfile, delete it.
+
 			if (n < 0)
 				std::cerr << "Error : read()\n";
 
@@ -110,7 +112,7 @@ void Response::responseToClient(int clientSocket, InfoClient infoClient)
 			long valWrite = write(clientSocket, resMsg.c_str(), resMsg.size());
 			if (valWrite == (long)resMsg.size())
 				std::cout << "SERVER RESPONSE SENT\n";
-			// unlink(filePath.c_str());
+			unlink(filePath.c_str()); // if you want to check output html, delete it
 			return;
 		}
 	}
@@ -172,14 +174,27 @@ Response::resMsgHeader(InfoClient &infoClient)
 	std::string cwdPath(cwd);
 	std::string file = "";
 	int contentLen = 0;
-	if (infoClient.req.t_result.target == "/home" || infoClient.req.t_result.target == "/")
-		file = cwdPath + "/resource/static/index.html";
-	else if (infoClient.req.t_result.target == "/server")
-		file = cwdPath + "/resource/static/server.html";
-	else if (infoClient.req.t_result.target == "/submit")
-		file = cwdPath + "/resource/static/submit.html";
-	else if (infoClient.req.t_result.target == "/upload")
-		file = cwdPath + "/resource/static/upload.html";
+	if (infoClient.req.t_result.method == GET)
+	{
+		file = "";
+		if (infoClient.req.t_result.target == "/home" || infoClient.req.t_result.target == "/")
+			file = cwdPath + "/resource/static/index.html";
+		else if (infoClient.req.t_result.target == "/server")
+			file = cwdPath + "/resource/static/server.html";
+		else if (infoClient.req.t_result.target == "/submit")
+			file = cwdPath + "/resource/static/submit.html";
+		else if (infoClient.req.t_result.target == "/upload")
+			file = cwdPath + "/resource/static/upload.html";
+	}
+	else if (infoClient.req.t_result.method == POST)
+	{
+		file = "";
+		if (infoClient.req.t_result.target == "/www/cgi-bin/submit.py")
+			file = cwdPath + "/submit_out.html";
+		else if (infoClient.req.t_result.target == "/www/cgi-bin/upload.py")
+			file = cwdPath + "/upload_out.html";
+	}
+	std::cout << "\n\nresponse file : " << file << "  \n\n";
 	stat(file.c_str(), &st);
 	contentLen = st.st_size;
 	setContentLength(contentLen);
