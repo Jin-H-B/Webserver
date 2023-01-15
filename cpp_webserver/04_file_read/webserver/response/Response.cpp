@@ -4,54 +4,55 @@
 
 #include "Response.hpp"
 #include "CGI.hpp"
-
-void
-Response::responseToClient(int clientSocket, InfoClient infoClient)
+#include <iostream>
+void Response::responseToClient(int clientSocket, InfoClient infoClient)
 {
+	char cwd[1024];
+	getcwd(cwd, 1024);
+	std::string cwdPath(cwd);
+	std::string execPath = "";
+	std::string filePath = "";
 	std::string resMsg = "";
 	if (infoClient.req.t_result.method == GET)
 	{
 		resMsg = makeResponseGET(infoClient);
-		std::cout << "		------result msg------- : \n" << resMsg << "\n";
-
+		std::cout << "		------result msg------- : \n"
+				  << resMsg << "\n";
 	}
 	else if (infoClient.req.t_result.method == POST)
 	{
-		char cwd[1024];
-		getcwd(cwd, 1024);
-		std::string cwdPath(cwd);
-		std::string execPath = "";
-		std::string filePath = "";
 		if (infoClient.req.t_result.target == "/www/cgi-bin/submit.py")
 		{
 			execPath = cwdPath + "/www/cgi-bin/submit.py";
-			filePath = cwdPath + "/submit.html";
+			filePath = cwdPath + "/submit_out.html";
 		}
 		else if (infoClient.req.t_result.target == "/www/cgi-bin/upload.py")
 		{
 			execPath = cwdPath + "/www/cgi-bin/upload.py";
-			filePath = cwdPath + "/upload.html";
+			filePath = cwdPath + "/upload_out.html";
 		}
 
 		std::string tmpFilePath = cwdPath + "/tmp_" + std::to_string(clientSocket);
 
-		int upFd = open(tmpFilePath.c_str(), O_WRONLY | O_CREAT, 0744);
-		write(upFd, infoClient.req.t_result.body.c_str(), infoClient.req.t_result.body.size());
+		/* tmp file to save content body */
+		int tmpFd = open(tmpFilePath.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0744);
+		write(tmpFd, infoClient.req.t_result.body.c_str(), infoClient.req.t_result.body.size());
+		close(tmpFd);
 
+		/* args for CGI script */
+		// char **args = new char *[sizeof(char *) * 3];
+		// args[0] = strdup(execPath.c_str());
+		// args[1] = NULL;
+		char *args[2] = {strdup(execPath.c_str()), NULL};
+		// std::cerr << "\n===CEHCK1 === \n";///
+		/* cgi env setting */
 		CGI cgi;
-		char **args = new char *[sizeof(char *) * 3];
-		args[0] = strdup("/opt/homebrew/bin/python3");
-		args[1] = strdup(execPath.c_str());
-		args[2] = NULL;
-		// args[2] = strdup(infoClient.req.t_result.body.c_str());
-		// args[3] = NULL;
-
 		cgi.initEnvMap(infoClient);
 		cgi.envMap.insert(std::pair<std::string, std::string>("UPLOAD_PATH", cwdPath));
 		cgi.envMap.insert(std::pair<std::string, std::string>("PATH_TRANSLATED", args[0]));
-		cgi.envMap.insert(std::pair<std::string, std::string>("SCRIPT_FILENAME", args[1]));
 
-		char **cgiEnv = new char *[sizeof(char *) * cgi.envMap.size() + 1]; // delete needed
+		// char **cgiEnv = new char *[sizeof(char *) * cgi.envMap.size() + 1]; // delete needed
+		char *cgiEnv[cgi.envMap.size() + 1];
 		cgiEnv[cgi.envMap.size()] = NULL;
 		int i = 0;
 		for (std::map<std::string, std::string>::iterator iter = cgi.envMap.begin(); iter != cgi.envMap.end(); ++iter)
@@ -60,45 +61,63 @@ Response::responseToClient(int clientSocket, InfoClient infoClient)
 			// std::cout << cgiEnv[i] << "\n";
 			i++;
 		}
-
+		// std::cerr << "\n===CEHCK2 === \n";///
 		int fds[2];
 		pipe(fds);
-		close(fds[0]);
-		dup2(fds[1], upFd);
+
 		int pid = fork();
-		waitpid(pid, NULL, 0);
+		// std::cerr << "\n===CEHCK3 === \n";///
 		if (pid == 0)
 		{
+			// std::cerr << "CHILD" << std::endl;
 			close(fds[1]);
 			dup2(fds[0], STDIN_FILENO);
 			close(fds[0]);
-			int resFd = open(filePath.c_str(), O_WRONLY | O_CREAT, 0744);
+			int resFd = open(filePath.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0744);
+			if (resFd < 0)
+				std::cerr << "Error : resFd open()\n";
 			dup2(resFd, STDOUT_FILENO);
+			close(resFd);
 
-			execve("/opt/homebrew/bin/python3", args, NULL);
-			// execve(execPath.c_str(), args, NULL);
-			// perror("execute failed!!");
+			execve(execPath.c_str(), args, cgiEnv);
+
 			exit(EXIT_SUCCESS);
 		}
 		else
 		{
+			int tmpFd = open(tmpFilePath.c_str(), O_RDONLY);
+			char buff[1024] = {0};
+
+			// std::cerr << "OPEN" << std::endl;
+			int n = read(tmpFd, buff, sizeof(buff));
+			close(tmpFd);
+			// std::cerr << "\n===CEHCK4 === \n";///
+			if (n < 0)
+				std::cerr << "Error : read()\n";
+
+			close(fds[0]);
+			write(fds[1], buff, sizeof(buff));
+			// std::cerr << "		test\n" << buff << "\n\n";
 			close(fds[1]);
-			close(upFd);
-			resMsg = resMsgHeader(infoClient) + "\n" + resMsgBody(filePath);
+
+			waitpid(pid, NULL, 0);
+
+			/* msg to client */
+			resMsg = resMsgHeader(infoClient);
+			resMsg += "\n" + resMsgBody(filePath);
+
 			std::cout << " response to client : " << clientSocket << "\n";
 			long valWrite = write(clientSocket, resMsg.c_str(), resMsg.size());
 			if (valWrite == (long)resMsg.size())
-				std::cout << "SERVER RESPONSE SENT\n\n\n\n";
+				std::cout << "SERVER RESPONSE SENT\n";
 			// unlink(filePath.c_str());
-			return ;
+			return;
 		}
 	}
 	else
 	{
 		resMsg = makeResponseERR();
 	}
-
-	(void)infoClient; // to be used
 
 	std::cout << " response to client : " << clientSocket << "\n";
 	long valWrite = write(clientSocket, resMsg.c_str(), resMsg.size());
@@ -170,7 +189,8 @@ Response::resMsgHeader(InfoClient &infoClient)
 	header << "Content-Type: " << getContentType() << "; charset=utf-8" << CRLF;
 	header << "Connection: " << getConnection() << CRLF;
 	header << "Date: " << timeStamp() << CRLF;
-	header << "Server: " << "little webserver" << CRLF;
+	header << "Server: "
+		   << "little webserver" << CRLF;
 	// header << "Transfer-Encoding : chunked" << CRLF;
 	header << "Content-Length: " << getContentLength() << CRLF;
 
@@ -187,8 +207,8 @@ Response::resMsgBody(std::string srcLocation)
 	int valRead = read(_fileFd, _fileBuff, sizeof(_fileBuff));
 	if (valRead == -1)
 		std::cerr << "	ERROR: read\n";
-		std::cerr << "srcLocation : " << srcLocation << "\n";
-		std::cerr << " valRead : " << valRead << " fileFd : " << _fileFd << "\n";
+	std::cerr << "srcLocation : " << srcLocation << "\n";
+	std::cerr << " valRead : " << valRead << " fileFd : " << _fileFd << "\n";
 	if (_fileFd == -1 || valRead == -1)
 	{
 		body << "<h1>ERROR</h1><img src=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==\" alt=\"Red dot\" />";
@@ -198,5 +218,3 @@ Response::resMsgBody(std::string srcLocation)
 
 	return body.str();
 }
-
-

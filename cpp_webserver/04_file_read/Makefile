@@ -1,6 +1,6 @@
 NAME		=	webserv
 CXX			=	c++
-CXXFLAGS	=	-Wall -Wextra -Werror -std=c++98 -pedantic
+CXXFLAGS	=	-Wall -Wextra -Werror #-std=c++98 -pedantic -g -fsanitize=address
 SRCS		=	main.cpp \
 				webserver/HttpServer.cpp \
 				webserver/connection/Connection.cpp \
