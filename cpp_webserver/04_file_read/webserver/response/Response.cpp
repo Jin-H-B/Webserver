@@ -134,13 +134,7 @@ void Response::responseToClient(int clientSocket, InfoClient infoClient)
 			/* msg to client */
 			resMsg = resMsgHeader(infoClient);
 			resMsg += "\n" + resMsgBody(filePath);
-
-			std::cout << " response to client : " << clientSocket << "\n";
-			long valWrite = write(clientSocket, resMsg.c_str(), resMsg.size());
-			if (valWrite == (long)resMsg.size())
-				std::cout << "SERVER RESPONSE SENT\n";
 			unlink(filePath.c_str()); // if you want to check output html, delete it
-			return;
 		}
 	}
 	else

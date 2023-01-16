@@ -28,6 +28,8 @@ print("</h4>")
 print("<div>")
 if (content_type.split(': ')[1] == "text/plain"):
     upload_file = open(upload_path + filename, "wt")
+    upload_file.write(file_content)
+    upload_file.close()
     print("<h1>")
     print("FILE UPLOADED!!")
     print("</h1>")
@@ -42,8 +44,7 @@ print("</div>")
 # "x" - Create - Creates the specified file, returns an error if the file exist
 # "t" - Text - Default value. Text mode
 # "b" - Binary - Binary mode (e.g. images)
-upload_file.write(file_content)
-upload_file.close()
+
 
 # print contents
 file_contents = content[4].split('\n')
