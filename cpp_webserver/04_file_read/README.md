@@ -28,5 +28,6 @@ webServer.runServer() : accept() + read() + write(); <br>
 /server : server.html <br>
 <h2> POST </h2>
 /submit : cgi request to submit.py<br>
-/upload : cgi request to upload.py<br>
+/upload : cgi request to upload.py, save only text file to uploaded directory<br>
+/delete : cgi request to delete all uploaded text files <br>
 
