@@ -17,4 +17,20 @@ enum {
 	DELETE
 };
 
+enum
+{
+	FileError = -1,
+	FileNone = 0,
+	FileMaking = 1,
+	FileComplete = 2
+};
+
+enum
+{
+	ResError = -1,
+	ResNone = 0,
+	ResMaking = 1,
+	ResComplete = 2
+};
+
 #endif
