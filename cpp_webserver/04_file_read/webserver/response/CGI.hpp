@@ -30,7 +30,6 @@ class CGI {
 			envMap.insert(std::pair<std::string, std::string>("QUERY_STRING", infoClient.req.t_result.query ));
 			envMap.insert(std::pair<std::string, std::string>("SERVER_PORT", std::to_string(infoClient._server->_port)));
 		}
-
 };
 
 #endif
