@@ -5,34 +5,43 @@ Response::openResponse()
 {
 	std::string cwdPath = this->getCwdPath();
 	std::string srcPath = "";
+
+	int isFile = m_fileManagerPtr->isValidStaticSrc(m_infoClientPtr->reqParser.t_result.target);
+	if (isFile == -1)
+		return ;
+
 	if (m_infoClientPtr->reqParser.t_result.method == GET)
 	{
 		std::cerr << "GET RESPONSE\n";
-		bool isFile = m_fileManagerPtr->isValidStaticSrc(m_infoClientPtr->reqParser.t_result.target);
+		std::cerr << "isFile :" << isFile << "\n";
 		if (isFile == true)
 		{
 			srcPath = cwdPath + "/www/statics" + m_infoClientPtr->reqParser.t_result.target;
-			m_infoClientPtr->status = ResMaking;
+			m_infoClientPtr->status = Res::Making;
 			int fd = -1;
 			struct stat ss;
-			if (stat(srcPath.c_str(), &ss) == -1 || S_ISREG(ss.st_mode) != true ||
-				(fd = open(srcPath.c_str(), O_RDONLY)) == -1)
-				std::cout << "errorPath failier" << std::endl;
+			std::cout << "srcPath : "<<srcPath << std::endl;
+			if (stat(srcPath.c_str(), &ss) == -1 || S_ISREG(ss.st_mode) != true || (fd = open(srcPath.c_str(), O_RDONLY)) == -1)
+				isFile = 500;
 			else
 			{
-				std::cout << "file size = " << ss.st_size << std::endl;
-				std::cout << "fd = " << fd << std::endl;
-				fcntl(fd, F_SETFL, O_NONBLOCK);
 				m_fileManagerPtr->m_file.fd = fd;
 				m_fileManagerPtr->m_infoFileptr = new InfoFile(); // to be deleted
 				m_fileManagerPtr->m_infoFileptr->m_infoClientPtr = m_infoClientPtr;
 				m_fileManagerPtr->m_infoFileptr->srcPath = srcPath;
+				m_infoClientPtr->status = Res::Making; // added
 			}
 		}
-		if (isFile == false)
+		if (isFile == 404 || isFile == 500)
 		{
+			std::cerr << "	NO FILE FOUND\n";
 			//404 response
 		}
+	}
+
+	if (m_infoClientPtr->reqParser.t_result.method == POST)
+	{
+
 	}
 }
 
@@ -66,4 +75,50 @@ Response::startResponse()
 	m_resMsg += "\n";
 	m_resMsg += m_fileManagerPtr->m_file.buffer;
 	m_totalBytes = m_resMsg.size();
+}
+
+const char *
+Response::getSendResult() const
+{
+	return (this->m_resMsg.c_str() + this->m_sentBytes);
+}
+
+size_t
+Response::getSendResultSize() const
+{
+	return (this->m_totalBytes - this->m_sentBytes);
+}
+
+size_t
+Response::changePosition(int n)
+{
+	if (n > 0)
+	{
+		if (m_sentBytes + n >= m_totalBytes)
+			m_sentBytes = m_totalBytes;
+		else
+			m_sentBytes += n;
+	}
+	return (getSendResultSize());
+}
+
+int
+Response::sendResponse()
+{
+	size_t n = send(m_infoClientPtr->m_socketFd, getSendResult(), getSendResultSize(), 0);
+
+	if (n < 0)
+		return Send::Error;
+	else if (changePosition(n) != 0)
+		return Send::Making;
+	else
+		return Send::Complete;
+}
+
+void
+Response::clearResponseByte()
+{
+	m_resMsg.clear();
+	m_sentBytes = 0;
+	m_totalBytes = 0;
 }

@@ -3,7 +3,7 @@
 
 #define SUCCESS 0
 #define FAIL -1
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 10
 
 #define MAX_NUM_EVENTS 1024
 
@@ -17,20 +17,37 @@ enum {
 	DELETE
 };
 
-enum
+namespace File
 {
-	FileError = -1,
-	FileNone = 0,
-	FileMaking = 1,
-	FileComplete = 2
-};
+	enum
+	{
+		Error = -1,
+		None = 0,
+		Making = 1,
+		Complete = 2
+	};
+}
 
-enum
+namespace Res
 {
-	ResError = -1,
-	ResNone = 0,
-	ResMaking = 1,
-	ResComplete = 2
-};
+	enum
+	{
+		Error = -1,
+		None = 0,
+		Making = 1,
+		Complete = 2
+	};
+}
+
+namespace Send
+{
+	enum
+	{
+		Error = -1,
+		None = 0,
+		Making = 1,
+		Complete = 2
+	};
+}
 
 #endif
