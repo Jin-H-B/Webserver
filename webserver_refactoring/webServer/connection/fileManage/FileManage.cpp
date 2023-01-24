@@ -89,6 +89,58 @@ FileManage::isValidTarget(std::string &target)
 	return (404);
 }
 
+
+// int
+// FileManage::isValidTarget(std::string &target)
+// {
+// 	std::cout << m_infoFileptr->isCgi << std::endl;
+// 	std::map<std::string, Location >::iterator it = m_infoFileptr->m_infoClientPtr->m_server->m_location.find(target);
+// 	if (it != m_infoFileptr->m_infoClientPtr->m_server->m_location.end())
+// 	{
+// 		std::string staticPath;
+// 		if (it->second.root != "")
+// 			staticPath = this->getCwdPath() + "/" + it->second.root;
+// 		else
+// 			staticPath = this->getCwdPath()  + "/";
+		
+// 		if (it->second.index[0] != "")
+// 			target = it->second.index[0];
+// 		std::cout << "target : " << target << std::endl;
+// 		DIR *dir;
+// 		if ((dir = opendir(staticPath.c_str())) == NULL)
+// 		{
+// 			if (errno == ENOTDIR)
+// 				return 0;
+// 			else if (errno == EACCES)
+// 				return 403;
+// 			else if (errno == ENOENT)
+// 				return 404;
+// 			else if (errno == EMFILE)
+// 				return 503;
+// 			else
+// 				return 500;
+// 		}
+// 		struct dirent *dirent = NULL;
+// 		while (true)
+// 		{
+// 			dirent = readdir(dir);
+// 			if (!dirent)
+// 				break;
+// 			if (strcmp(dirent->d_name, (target).c_str()) == SUCCESS)
+// 			{
+// 				(target).insert(0, "/");
+// 				struct stat ss;
+// 				std::string resPath = staticPath + target;
+// 				if (stat(resPath.c_str(), &ss) == -1 || S_ISREG(ss.st_mode) != true)
+// 					return (500);
+// 				std::cout << "resPath : " << resPath << std::endl;
+// 				return (200);
+// 			}
+// 		}
+// 	}
+// 	return (404);
+// }
+
 int
 FileManage::readFile(int fd)
 {
