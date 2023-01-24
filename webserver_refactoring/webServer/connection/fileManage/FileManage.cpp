@@ -65,6 +65,10 @@ FileManage::isValidTarget(std::string &target)
         target = "delete.py";
     else if (target == "/submit.py")
         target = "submit.py";
+	else if (target == "/favicon.ico")
+		return -1;
+
+	std::cout << "	TARGET validation : " << target << "\n\n";
 
 	std::string srcPath;
     srcPath = this->getCwdPath() + "/www/statics";

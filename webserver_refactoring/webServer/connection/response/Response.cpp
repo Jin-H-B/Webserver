@@ -12,9 +12,13 @@ Response::openResponse()
 	{
 		//send Error msg;
 		std::cerr << "	ERROR : INVALID TARGET\n";
-		return;
+		return ;
 	}
-
+	if (isFile == -1)
+	{
+		m_infoClientPtr->isFavicon = true;
+		return ;
+	}
 	if (m_infoClientPtr->reqParser.t_result.method == GET)
 	{
 		std::cerr << "GET RESPONSE\n";
@@ -40,7 +44,7 @@ Response::openResponse()
 		if (isFile == 404 || isFile == 500)
 		{
 			std::cerr << "	NO FILE FOUND\n";
-			//404 response
+			return ;
 		}
 	}
 

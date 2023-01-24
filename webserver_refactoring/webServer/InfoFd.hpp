@@ -23,6 +23,7 @@ class InfoClient
 		Request reqParser;
 		Response *m_responserPtr;
 		bool isCgi;
+		bool isFavicon;
 
 	public:
 		int status;
