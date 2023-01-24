@@ -4,6 +4,7 @@
 #include "../../includes/libraries.hpp"
 #include "../../includes/Define.hpp"
 #include "../../InfoFd.hpp"
+#include "CGI.hpp"
 
 class InfoFile;
 
@@ -21,6 +22,7 @@ class FileManage
 	public:
 		FileEvent m_file;
 		InfoFile *m_infoFileptr;
+		CGI m_cgi;
 
 	public:
 		int isValidStaticSrc(std::string &targetPath);

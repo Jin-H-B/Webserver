@@ -86,13 +86,25 @@ Connection::handleReadEvent()
 					m_clientFdMap[currEvent->ident].m_responserPtr->openResponse();
 					if (m_clientFdMap[currEvent->ident].m_responserPtr->m_fileManagerPtr->m_file.fd != -1)
 					{
-						int fileFd = m_clientFdMap[currEvent->ident].m_responserPtr->m_fileManagerPtr->m_file.fd;
-						enrollEventToChangeList(currEvent->ident, EVFILT_READ, EV_DELETE | EV_DISABLE, 0, 0, NULL);
-						enrollEventToChangeList(fileFd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
-						fcntl(fileFd, F_SETFL, O_NONBLOCK);
-						m_fileFdMap.insert(std::make_pair(fileFd, *(m_clientFdMap[currEvent->ident].m_responserPtr->m_fileManagerPtr->m_infoFileptr)));
-						m_fileFdMap[fileFd].m_fileManagerPtr = m_clientFdMap[currEvent->ident].m_responserPtr->m_fileManagerPtr;
-						m_clientFdMap[currEvent->ident].m_responserPtr->m_fileManagerPtr->m_infoFileptr->m_fileFdMapPtr = &m_fileFdMap;
+						if (m_clientFdMap[currEvent->ident].isCgi == false)
+						{
+							int fileFd = m_clientFdMap[currEvent->ident].m_responserPtr->m_fileManagerPtr->m_file.fd;
+							enrollEventToChangeList(currEvent->ident, EVFILT_READ, EV_DELETE | EV_DISABLE, 0, 0, NULL);
+							enrollEventToChangeList(fileFd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
+							fcntl(fileFd, F_SETFL, O_NONBLOCK);
+							m_fileFdMap.insert(std::make_pair(fileFd, *(m_clientFdMap[currEvent->ident].m_responserPtr->m_fileManagerPtr->m_infoFileptr)));
+							m_fileFdMap[fileFd].m_fileManagerPtr = m_clientFdMap[currEvent->ident].m_responserPtr->m_fileManagerPtr;
+							m_clientFdMap[currEvent->ident].m_responserPtr->m_fileManagerPtr->m_infoFileptr->m_fileFdMapPtr = &m_fileFdMap;
+						}
+						else
+						{
+							int fileFd = m_clientFdMap[currEvent->ident].m_responserPtr->m_fileManagerPtr->m_file.fd;
+							enrollEventToChangeList(fileFd, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, NULL);
+							fcntl(fileFd, F_SETFL, O_NONBLOCK);
+							m_fileFdMap.insert(std::make_pair(fileFd, *(m_clientFdMap[currEvent->ident].m_responserPtr->m_fileManagerPtr->m_infoFileptr)));
+							m_fileFdMap[fileFd].m_fileManagerPtr = m_clientFdMap[currEvent->ident].m_responserPtr->m_fileManagerPtr;
+							m_clientFdMap[currEvent->ident].m_responserPtr->m_fileManagerPtr->m_infoFileptr->m_fileFdMapPtr = &m_fileFdMap;
+						}
 					}
 				}
 				// else if (Send::Making)
@@ -226,6 +238,7 @@ Connection::initInfoClient(int clientSocket)
 	tmpInfo.m_server = &m_serverFdMap[currEvent->ident];
 	tmpInfo.m_responserPtr = new Response(); //delete needed
 	tmpInfo.m_responserPtr->m_fileManagerPtr = new FileManage(); // delete needed
+	tmpInfo.isCgi = false;
 	m_clientFdMap.insert(std::pair<int, InfoClient>(clientSocket, tmpInfo));
 	m_clientFdMap[clientSocket].m_responserPtr->m_infoClientPtr = &m_clientFdMap[clientSocket];
 }

@@ -3,7 +3,7 @@ import sys, urllib.parse
 
 # Read the form data from the stdin stream
 post_data = sys.stdin.read()
-
+print(post_data)
 # convert to string and strip the trailing null characters
 post_data = post_data.rstrip("\x00")
 

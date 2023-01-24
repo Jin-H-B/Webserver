@@ -22,6 +22,7 @@ class InfoClient
 		InfoServer *m_server;
 		Request reqParser;
 		Response *m_responserPtr;
+		bool isCgi;
 
 	public:
 		int status;

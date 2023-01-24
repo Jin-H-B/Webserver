@@ -5,6 +5,7 @@ Response::openResponse()
 {
 	std::string cwdPath = this->getCwdPath();
 	std::string srcPath = "";
+	std::string execPath = "";
 
 	int isFile = m_fileManagerPtr->isValidStaticSrc(m_infoClientPtr->reqParser.t_result.target);
 	if (isFile == -1)
@@ -41,7 +42,59 @@ Response::openResponse()
 
 	if (m_infoClientPtr->reqParser.t_result.method == POST)
 	{
+		cwdPath = this->getCwdPath();
+		execPath = getCwdPath() + "/www/cgi-bin" + m_infoClientPtr->reqParser.t_result.target;
+		char const *args[2] = {execPath.c_str(), NULL};
 
+		m_fileManagerPtr->m_cgi.initEnvMap();
+		if (m_infoClientPtr->reqParser.t_result.method == GET)
+			m_fileManagerPtr->m_cgi.envMap.insert(std::pair<std::string, std::string>("REQUEST_METHOD", "GET"));
+		else if (m_infoClientPtr->reqParser.t_result.method == POST)
+			m_fileManagerPtr->m_cgi.envMap.insert(std::pair<std::string, std::string>("REQUEST_METHOD", "POST"));
+		else if (m_infoClientPtr->reqParser.t_result.method == DELETE)
+			m_fileManagerPtr->m_cgi.envMap.insert(std::pair<std::string, std::string>("REQUEST_METHOD", "DELETE"));
+		m_fileManagerPtr->m_cgi.envMap.insert(std::pair<std::string, std::string>("QUERY_STRING", m_infoClientPtr->reqParser.t_result.query));
+		m_fileManagerPtr->m_cgi.envMap.insert(std::pair<std::string, std::string>("SERVER_PORT", std::to_string(m_infoClientPtr->m_server->m_port)));
+		m_fileManagerPtr->m_cgi.envMap.insert(std::pair<std::string, std::string>("UPLOAD_PATH", cwdPath + "/db/"));
+		m_fileManagerPtr->m_cgi.envMap.insert(std::pair<std::string, std::string>("PATH_TRANSLATED", args[0]));
+
+		char **envs = new char *[sizeof(char *) *m_fileManagerPtr->m_cgi.envMap.size()];
+		int i = 0;
+		for (std::map<std::string, std::string>::iterator it = m_fileManagerPtr->m_cgi.envMap.begin();\
+			it != m_fileManagerPtr->m_cgi.envMap.end(); ++it)
+		{
+			envs[i] = strdup((it->first + "=" + it->second).c_str());
+			++i;
+		}
+		
+		int fds[2];
+		pipe(fds);
+		int pid = fork();
+		if (pid > 0)
+		{
+			close(fds[0]);
+			waitpid(pid, NULL, WNOHANG);
+			m_infoClientPtr->isCgi = true;
+			m_fileManagerPtr->m_file.fd = fds[1];
+			m_fileManagerPtr->m_infoFileptr = new InfoFile(); // to be deleted
+			m_fileManagerPtr->m_infoFileptr->m_infoClientPtr = m_infoClientPtr;
+			m_fileManagerPtr->m_infoFileptr->srcPath = srcPath;
+			m_infoClientPtr->status = Res::Making; // added
+		}
+		else if (pid == 0)
+		{
+			close(fds[1]);
+			dup2(fds[0], STDIN_FILENO);
+			close(fds[0]);
+			std::string outPath = getCwdPath() + "/cgiout_" + std::to_string(m_infoClientPtr->m_socketFd) + ".html";
+			int resFd = open(outPath.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0744);
+			if (resFd < 0)
+				std::cerr << "	Error : resFd open()\n";
+			dup2(resFd, STDOUT_FILENO);
+			close(resFd);
+			execve(execPath.c_str(), const_cast<char* const*>(args), envs);
+			exit(EXIT_SUCCESS);
+		}
 	}
 }
 
