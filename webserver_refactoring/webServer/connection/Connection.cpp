@@ -83,6 +83,9 @@ Connection::handleReadEvent()
 				if (m_clientFdMap[currEvent->ident].status == Res::None)
 				{
 					// m_clientFdMap[currEvent->ident].reqParser.printRequest();
+					std::cout << "	--REQUEST FROM CLIENT " << currEvent->ident << "--\n" << m_clientFdMap[currEvent->ident].reqParser.t_result.orig << "\n\n";
+					m_clientFdMap[currEvent->ident].reqParser.t_result.orig = "";
+
 					m_clientFdMap[currEvent->ident].m_responserPtr->openResponse();
 					if (m_clientFdMap[currEvent->ident].m_responserPtr->m_fileManagerPtr->m_file.fd != -1)
 					{
@@ -177,12 +180,23 @@ Connection::handleWriteEvent()
 	/* write event */
 	if (currEvent->filter == EVFILT_WRITE)
 	{
-		std::cout << "\n\n WRITE EVENT : " << currEvent->ident << std::endl;
+		// std::cout << "\n\n WRITE EVENT : " << currEvent->ident << std::endl;
+		
 		if (m_clientFdMap.find(currEvent->ident) != m_clientFdMap.end())
 		{
-			int res = m_clientFdMap[currEvent->ident].m_responserPtr->sendResponse();
+			int result;
+			if (m_clientFdMap[currEvent->ident].isCgi == false)
+				result = m_clientFdMap[currEvent->ident].m_responserPtr->sendResponse();
+			if (m_clientFdMap[currEvent->ident].isCgi == true)
+			{
+				if (m_clientFdMap[currEvent->ident].m_responserPtr->m_fileManagerPtr->isCgiOutDone() == true)
+				{
+					m_clientFdMap[currEvent->ident].m_responserPtr->m_fileManagerPtr->m_infoFileptr->srcPath = m_clientFdMap[currEvent->ident].m_responserPtr->cgiOutPath;
+					result = m_clientFdMap[currEvent->ident].m_responserPtr->sendResponse();
+				}
+			}
 
-			switch (res)
+			switch (result)
 			{
 			case Send::Error:
 				// 500 error page open
@@ -195,6 +209,8 @@ Connection::handleWriteEvent()
 				m_clientFdMap[currEvent->ident].status = Res::Making;
 				break;
 			case Send::Complete:
+					std::cout << "	--RESPONSE SENT TO CLIENT " << currEvent->ident << "--\n\n";
+
 					enrollEventToChangeList(currEvent->ident, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
 					enrollEventToChangeList(currEvent->ident, EVFILT_WRITE, EV_DELETE | EV_DISABLE, 0, 0, NULL);
 					m_clientFdMap[currEvent->ident].m_responserPtr->clearResInfo();
@@ -202,15 +218,40 @@ Connection::handleWriteEvent()
 					m_clientFdMap[currEvent->ident].m_responserPtr->m_fileManagerPtr->clearFileEvent();
 					m_clientFdMap[currEvent->ident].status = Res::Complete;
 					m_clientFdMap[currEvent->ident].reqParser.clearRequest();
+					if (m_clientFdMap[currEvent->ident].isCgi == true)
+					{
+						m_clientFdMap[currEvent->ident].isCgi = false;
+						m_clientFdMap[currEvent->ident].m_responserPtr->cgiOutPath = "";
+						m_clientFdMap[currEvent->ident].m_responserPtr->cgiOutTarget = "";
+					}
 					//make clear client info logic
+
+					// close(currEvent->ident); //temporarily added
+					// // m_clientFdMap[currEvent->ident].m_server->m_clients.erase();
+					// m_clientFdMap.erase(currEvent->ident); //temporarily added
 				break;
-
 			}
 
-			if (m_fileFdMap.find(currEvent->ident) != m_fileFdMap.end())
+			if (m_fileFdMap.find(currEvent->ident) != m_fileFdMap.end() && m_fileFdMap[currEvent->ident].m_infoClientPtr->isCgi == true)
 			{
-			}
+				int result = m_fileFdMap[currEvent->ident].m_infoClientPtr->m_responserPtr->m_fileManagerPtr->writePipe(currEvent->ident);
+				std::cout << "		RESULT OF CGI WRITE : " << result << "\n\n";
+				switch (result)
+				{
+				case Write::Error:
+					m_clientFdMap.erase(currEvent->ident);
+					close(currEvent->ident);
+					break;
+				
+				case Write::Making:
+					break;
 
+				case Write::Complete:
+					close(currEvent->ident);
+					m_fileFdMap.erase(currEvent->ident);
+					break;
+				}
+			}
 		}
 	}
 }

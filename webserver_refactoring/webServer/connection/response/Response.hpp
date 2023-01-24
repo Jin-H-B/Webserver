@@ -20,7 +20,8 @@ class Response : public ResponseInfo
 		std::string m_resMsg;
 		size_t m_totalBytes;
 		size_t m_sentBytes;
-		
+		std::string cgiOutPath;
+		std::string cgiOutTarget;
 
 	public:
 		void openResponse();

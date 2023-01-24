@@ -7,9 +7,13 @@ Response::openResponse()
 	std::string srcPath = "";
 	std::string execPath = "";
 
-	int isFile = m_fileManagerPtr->isValidStaticSrc(m_infoClientPtr->reqParser.t_result.target);
-	if (isFile == -1)
-		return ;
+	int isFile = m_fileManagerPtr->isValidTarget(m_infoClientPtr->reqParser.t_result.target);
+	if (isFile >= 400)
+	{
+		//send Error msg;
+		std::cerr << "	ERROR : INVALID TARGET\n";
+		return;
+	}
 
 	if (m_infoClientPtr->reqParser.t_result.method == GET)
 	{
@@ -44,6 +48,9 @@ Response::openResponse()
 	{
 		cwdPath = this->getCwdPath();
 		execPath = getCwdPath() + "/www/cgi-bin" + m_infoClientPtr->reqParser.t_result.target;
+		cgiOutTarget = "cgiout_" + std::to_string(m_infoClientPtr->m_socketFd) + ".html";
+		cgiOutPath = getCwdPath() + "/" + cgiOutTarget;
+
 		char const *args[2] = {execPath.c_str(), NULL};
 
 		m_fileManagerPtr->m_cgi.initEnvMap();
@@ -67,27 +74,27 @@ Response::openResponse()
 			++i;
 		}
 		
-		int fds[2];
-		pipe(fds);
+		pipe(m_fileManagerPtr->m_infoFileptr->fds);
 		int pid = fork();
 		if (pid > 0)
-		{
-			close(fds[0]);
+		{	
+		std::cout << "	This is Parent of POST : \n";
+			close(m_fileManagerPtr->m_infoFileptr->fds[0]);
 			waitpid(pid, NULL, WNOHANG);
 			m_infoClientPtr->isCgi = true;
-			m_fileManagerPtr->m_file.fd = fds[1];
+			m_fileManagerPtr->m_file.fd = m_fileManagerPtr->m_infoFileptr->fds[1];
 			m_fileManagerPtr->m_infoFileptr = new InfoFile(); // to be deleted
 			m_fileManagerPtr->m_infoFileptr->m_infoClientPtr = m_infoClientPtr;
-			m_fileManagerPtr->m_infoFileptr->srcPath = srcPath;
+			m_fileManagerPtr->m_infoFileptr->srcPath = ""; // to be updated when isCgiDone == true
 			m_infoClientPtr->status = Res::Making; // added
 		}
 		else if (pid == 0)
 		{
-			close(fds[1]);
-			dup2(fds[0], STDIN_FILENO);
-			close(fds[0]);
-			std::string outPath = getCwdPath() + "/cgiout_" + std::to_string(m_infoClientPtr->m_socketFd) + ".html";
-			int resFd = open(outPath.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0744);
+		std::cout << "	This is Child of POST : \n";
+			close(m_fileManagerPtr->m_infoFileptr->fds[1]);
+			dup2(m_fileManagerPtr->m_infoFileptr->fds[0], STDIN_FILENO);
+			close(m_fileManagerPtr->m_infoFileptr->fds[0]);
+			int resFd = open(cgiOutPath.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0744);
 			if (resFd < 0)
 				std::cerr << "	Error : resFd open()\n";
 			dup2(resFd, STDOUT_FILENO);

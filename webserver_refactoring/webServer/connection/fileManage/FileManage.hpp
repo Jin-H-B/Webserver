@@ -16,6 +16,9 @@ class FileManage
 			int fd;
 			std::size_t size;
 			std::string buffer;
+			std::size_t m_totalBytes;
+			std::size_t m_sentBytes;
+			std::size_t m_pipe_sentBytes;
 			FileEvent() : fd(-1), size(0), buffer("") {}
 		};
 
@@ -25,9 +28,13 @@ class FileManage
 		CGI m_cgi;
 
 	public:
-		int isValidStaticSrc(std::string &targetPath);
+		int isValidTarget(std::string &targetPath);
 		int	readFile(int fd);
 		void clearFileEvent();
+		bool isCgiOutDone();
+
+	public:	
+		int writePipe(int fd);
 
 	public:
 		std::string getCwdPath()

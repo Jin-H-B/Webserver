@@ -15,7 +15,7 @@
 # define SIZE_MAX_HEADER 2048
 # define SIZE_MAX_HOST 128 // verifyhost
 # define SIZE_MAX_CHUNK 3 // hex FFF = dec 4095
-# define SIZE_MAX_BODY 819200000
+# define SIZE_MAX_BODY 200000
 
 /** Request class
  * author: jinoh
