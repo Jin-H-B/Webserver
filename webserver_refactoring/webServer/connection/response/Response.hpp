@@ -34,7 +34,9 @@ class Response : public ResponseInfo
 		size_t getSendResultSize() const;
 		const char * getSendResult() const;
 		void clearResponseByte();
-
+		
+	public:
+		void send_image(int client_socket, std::string image_file_path);
 };
 
 #endif

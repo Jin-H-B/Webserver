@@ -68,6 +68,11 @@ FileManage::isValidTarget(std::string &target)
 	else if (target == "/favicon.ico")
 		return -1;
 
+	if (target == "/image.jpeg")
+	{
+		target = "image.jpeg";
+	}
+
 	std::cout << "	TARGET validation : " << target << "\n\n";
 
 	std::string srcPath;
@@ -88,6 +93,12 @@ FileManage::isValidTarget(std::string &target)
 			(target).insert(0, "/");
 			return (1);
 		}
+	}
+
+	if (target == "/image.jpeg")
+	{
+		m_infoFileptr->m_infoClientPtr->m_responserPtr->send_image(m_infoFileptr->m_infoClientPtr->m_socketFd, srcPath.c_str()); 
+		return (0);
 	}
 
 	return (404);

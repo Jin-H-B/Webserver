@@ -26,4 +26,7 @@
 #include <sys/stat.h>
 #include <dirent.h>
 
+#include <netinet/in.h>
+#include <fstream>
+
 #endif

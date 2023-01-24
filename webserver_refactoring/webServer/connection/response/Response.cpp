@@ -23,6 +23,7 @@ Response::openResponse()
 	{
 		std::cerr << "GET RESPONSE\n";
 		std::cerr << "isFile :" << isFile << "\n";
+			
 		if (isFile == true)
 		{
 			srcPath = cwdPath + "/www/statics" + m_infoClientPtr->reqParser.t_result.target;
@@ -185,4 +186,24 @@ Response::clearResponseByte()
 	m_resMsg.clear();
 	m_sentBytes = 0;
 	m_totalBytes = 0;
+}
+
+void 
+Response::send_image(int client_socket, std::string image_file_path) {
+    // Open the image file
+    std::ifstream image_file(image_file_path, std::ios::binary);
+    // Get the file size
+    image_file.seekg(0, std::ios::end);
+    int file_size = image_file.tellg();
+    image_file.seekg(0, std::ios::beg);
+    // Send the HTTP headers
+    std::string headers = "HTTP/1.1 200 OK\r\nContent-Type: image/jpeg\r\nContent-Length: " + std::to_string(file_size) + "\r\n\r\n";
+    send(client_socket, headers.c_str(), headers.length(), 0);
+    // Send the image data
+    char buffer[1024];
+    while (image_file.read(buffer, sizeof(buffer)).gcount() > 0) {
+        send(client_socket, buffer, image_file.gcount(), 0);
+    }
+    // Close the image file
+    image_file.close();
 }
