@@ -10,13 +10,10 @@ form = cgi.FieldStorage()
 first_name = form.getvalue('first_name')
 last_name = form.getvalue('last_name')
 
-# print(form)
-
 print ("<html>")
 print ("<head>")
 print ("</head>")
 print ("<body>")
-print(form)
 print ("<h2> POST Result </h2>")
 print ("<h3>%s's last name is %s</h3>" %(first_name, last_name))
 print ("</body>")
