@@ -29,6 +29,7 @@ class Connection : public Multiplex
 		void handleReadEvent();
 		void handleWriteEvent();
 		void handleErrorEvent();
+		void handleEofEvent();
 		void setNonBlock(int fd);
 		void initInfoClient(int clientSocket);
 };

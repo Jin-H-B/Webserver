@@ -79,7 +79,7 @@ FileManage::isValidTarget(std::string &target)
     srcPath = this->getCwdPath() + "/www/statics";
     if (m_infoFileptr != NULL && m_infoFileptr->m_infoClientPtr->reqParser.t_result.method == POST)
         srcPath = this->getCwdPath() + "/www/cgi-bin";
-	
+
 	// std::cout << "path : " << staticPath << std::endl;
 	DIR *dir = opendir(srcPath.c_str());
 	struct dirent *dirent = NULL;
@@ -93,12 +93,6 @@ FileManage::isValidTarget(std::string &target)
 			(target).insert(0, "/");
 			return (1);
 		}
-	}
-
-	if (target == "/image.jpeg")
-	{
-		m_infoFileptr->m_infoClientPtr->m_responserPtr->send_image(m_infoFileptr->m_infoClientPtr->m_socketFd, srcPath.c_str()); 
-		return (0);
 	}
 
 	return (404);
@@ -117,7 +111,7 @@ FileManage::isValidTarget(std::string &target)
 // 			staticPath = this->getCwdPath() + "/" + it->second.root;
 // 		else
 // 			staticPath = this->getCwdPath()  + "/";
-		
+
 // 		if (it->second.index[0] != "")
 // 			target = it->second.index[0];
 // 		std::cout << "target : " << target << std::endl;

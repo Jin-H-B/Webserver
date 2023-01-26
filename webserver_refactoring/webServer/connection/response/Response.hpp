@@ -27,16 +27,16 @@ class Response : public ResponseInfo
 		void openResponse();
 		void initResponse();
 		void startResponse();
-	
+
 	public:
 		int sendResponse();
 		size_t changePosition(int n);
 		size_t getSendResultSize() const;
 		const char * getSendResult() const;
 		void clearResponseByte();
-		
-	public:
-		void send_image(int client_socket, std::string image_file_path);
+
+	// public:
+	// 	void send_image(int client_socket, std::string image_file_path);
 };
 
 #endif

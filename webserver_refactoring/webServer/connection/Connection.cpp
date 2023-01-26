@@ -9,14 +9,16 @@ void Connection::eventLoop()
 		for (int i = 0; i < eventNum; ++i)
 		{
 			currEvent = &getEventList()[i];
-			if (currEvent->filter == EVFILT_TIMER)
+			if (currEvent->flags & EV_ERROR)
+				handleErrorEvent();
+			else if (currEvent->flags & EV_EOF)
+				handleEofEvent();
+			else if (currEvent->filter == EVFILT_TIMER)
 				handleTimeOut();
 			else if (currEvent->filter == EVFILT_READ)
 				handleReadEvent();
 			else if (currEvent->filter == EVFILT_WRITE)
 				handleWriteEvent();
-			else if (currEvent->flags & EV_ERROR)
-				handleErrorEvent();
 		}
 	}
 }
@@ -43,6 +45,12 @@ void Connection::handleTimeOut()
 		enrollEventToChangeList(currEvent->ident, EVFILT_TIMER, EV_DELETE | EV_DISABLE, 0, 0, NULL);
 		close(currEvent->ident);
 	}
+}
+
+void
+Connection::handleEofEvent()
+{
+
 }
 
 void Connection::handleReadEvent()
@@ -106,7 +114,7 @@ void Connection::handleReadEvent()
 					m_clientFdMap[currEvent->ident].m_responserPtr->openResponse();
 					if (m_clientFdMap[currEvent->ident].isFavicon == true)
 					{
-						
+
 					}
 					else if (m_clientFdMap[currEvent->ident].m_responserPtr->m_fileManagerPtr->m_file.fd != -1)
 					{
@@ -205,16 +213,7 @@ void Connection::handleWriteEvent()
 		if (m_clientFdMap.find(currEvent->ident) != m_clientFdMap.end())
 		{
 			int result;
-			if (m_clientFdMap[currEvent->ident].isCgi == false)
-				result = m_clientFdMap[currEvent->ident].m_responserPtr->sendResponse();
-			if (m_clientFdMap[currEvent->ident].isCgi == true)
-			{
-				if (m_clientFdMap[currEvent->ident].m_responserPtr->m_fileManagerPtr->isCgiOutDone() == true)
-				{
-					m_clientFdMap[currEvent->ident].m_responserPtr->m_fileManagerPtr->m_infoFileptr->srcPath = m_clientFdMap[currEvent->ident].m_responserPtr->cgiOutPath;
-					result = m_clientFdMap[currEvent->ident].m_responserPtr->sendResponse();
-				}
-			}
+			result = m_clientFdMap[currEvent->ident].m_responserPtr->sendResponse();
 
 			switch (result)
 			{
@@ -229,7 +228,8 @@ void Connection::handleWriteEvent()
 				m_clientFdMap[currEvent->ident].status = Res::Making;
 				break;
 			case Send::Complete:
-				std::cout << "	--RESPONSE SENT TO CLIENT " << currEvent->ident << "--\n\n";
+				std::cout << "	--RESPONSE SENT TO CLIENT " << currEvent->ident << "--\n";
+				std::cout << m_clientFdMap[currEvent->ident].m_responserPtr->m_resMsg << "\n\n";
 
 				enrollEventToChangeList(currEvent->ident, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
 				enrollEventToChangeList(currEvent->ident, EVFILT_WRITE, EV_DELETE | EV_DISABLE, 0, 0, NULL);
