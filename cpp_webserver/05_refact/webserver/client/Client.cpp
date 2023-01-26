@@ -203,6 +203,9 @@ Client::isValidTarget(std::string &target)
 	else if (target == "/image.jpeg")
 		target = "image.jpeg";
 
+	if (target == "/favicon.ico")
+		std::cout << "\n-->FAVICON REQUESTED \n";
+
 	std::string srcPath;
 	srcPath = this->getCwdPath() + "/www/statics";
 	if (this->reqParser.t_result.method == POST)
@@ -218,7 +221,7 @@ Client::isValidTarget(std::string &target)
 			break;
 		if (strcmp(dirent->d_name, (target).c_str()) == SUCCESS)
 		{
-			std::cout << "[!]SRC FOUND \n";
+			std::cout << "\n[!]SRC FOUND \n";
 			(target).insert(0, "/");
 			return (200);
 		}
@@ -263,7 +266,6 @@ Client::clearFileEvent()
 	m_file.size = 0;
 	m_file.buffer = "";
 }
-
 
 int
 Client::writePipe(int fd)

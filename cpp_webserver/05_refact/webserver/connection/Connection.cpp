@@ -132,6 +132,10 @@ Connection::handleReadEvent()
 
 			if (m_clientMap[currEvent->ident].reqParser.t_result.pStatus == Request::ParseComplete)
 			{
+				std::cout << "\n --REQUEST FROM CLIENT " << currEvent->ident << "--\n :: "
+							  << m_clientMap[currEvent->ident].reqParser.t_result.orig << "\n\n";
+					m_clientMap[currEvent->ident].reqParser.t_result.orig = "";
+
 				if (m_clientMap[currEvent->ident].status == Res::None)
 				{
 					m_clientMap[currEvent->ident].openResponse();
