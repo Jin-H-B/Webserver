@@ -1,0 +1,434 @@
+Listening on 127.0.0.1:8080
+Listening on 0.0.0.0:8081
+SERVER : 4	=>	ACCEPT : 6
+SERVER : 4	=>	ACCEPT : 7
+
+--IN CLIENT : 6
+valRead :615
+
+ RESULT HEADER 
+=>accept = image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8
+=>accept-encoding = gzip, deflate, br
+=>accept-language = ko-kr,ko;q=0.9,en-us;q=0.8,en;q=0.7
+=>connection = keep-alive
+=>host = localhost:8081
+=>referer = http://localhost:8081/upload
+=>sec-ch-ua = "not_a brand";v="99", "google chrome";v="109", "chromium";v="109"
+=>sec-ch-ua-mobile = ?0
+=>sec-ch-ua-platform = "macos"
+=>sec-fetch-dest = image
+=>sec-fetch-mode = no-cors
+=>sec-fetch-site = same-origin
+=>user-agent = mozilla/5.0 (macintosh; intel mac os x 10_15_7) applewebkit/537.36 (khtml, like gecko) chrome/109.0.0.0 safari/537.36
+
+ --REQUEST FROM CLIENT 6--
+ :: GET /favicon.ico HTTP/1.1
+Host: localhost:8081
+Connection: keep-alive
+sec-ch-ua: "Not_A Brand";v="99", "Google Chrome";v="109", "Chromium";v="109"
+sec-ch-ua-mobile: ?0
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36
+sec-ch-ua-platform: "macOS"
+Accept: image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8
+Sec-Fetch-Site: same-origin
+Sec-Fetch-Mode: no-cors
+Sec-Fetch-Dest: image
+Referer: http://localhost:8081/upload
+Accept-Encoding: gzip, deflate, br
+Accept-Language: ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7
+
+
+
+
+-->FAVICON REQUESTED 
+SROUCE PATH : /Users/jinhyeok/Desktop/42seoul/git_webserver/cpp_webserver/05_refact/www/statics
+
+--IN CLIENT : 7
+valRead :885
+
+ RESULT HEADER 
+=>accept = text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9
+=>accept-encoding = gzip, deflate, br
+=>accept-language = ko-kr,ko;q=0.9,en-us;q=0.8,en;q=0.7
+=>cache-control = max-age=0
+=>connection = keep-alive
+=>content-length = 20
+=>content-type = application/x-www-form-urlencoded
+=>host = localhost:8081
+=>origin = http://localhost:8081
+=>referer = http://localhost:8081/upload
+=>sec-ch-ua = "not_a brand";v="99", "google chrome";v="109", "chromium";v="109"
+=>sec-ch-ua-mobile = ?0
+=>sec-ch-ua-platform = "macos"
+=>sec-fetch-dest = document
+=>sec-fetch-mode = navigate
+=>sec-fetch-site = same-origin
+=>sec-fetch-user = ?1
+=>upgrade-insecure-requests = 1
+=>user-agent = mozilla/5.0 (macintosh; intel mac os x 10_15_7) applewebkit/537.36 (khtml, like gecko) chrome/109.0.0.0 safari/537.36
+
+ --REQUEST FROM CLIENT 7--
+ :: POST /upload.py HTTP/1.1
+Host: localhost:8081
+Connection: keep-alive
+Content-Length: 20
+Cache-Control: max-age=0
+sec-ch-ua: "Not_A Brand";v="99", "Google Chrome";v="109", "Chromium";v="109"
+sec-ch-ua-mobile: ?0
+sec-ch-ua-platform: "macOS"
+Upgrade-Insecure-Requests: 1
+Origin: http://localhost:8081
+Content-Type: application/x-www-form-urlencoded
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9
+Sec-Fetch-Site: same-origin
+Sec-Fetch-Mode: navigate
+Sec-Fetch-User: ?1
+Sec-Fetch-Dest: document
+Referer: http://localhost:8081/upload
+Accept-Encoding: gzip, deflate, br
+Accept-Language: ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7
+
+filename=submit.html
+
+SROUCE PATH : /Users/jinhyeok/Desktop/42seoul/git_webserver/cpp_webserver/05_refact/www/cgi-bin
+
+[!]SRC FOUND 
+execPath : /Users/jinhyeok/Desktop/42seoul/git_webserver/cpp_webserver/05_refact/www/cgi-bin/upload.py
+	This is Parent of POST : 
+222
+inFds[0] : 10 inFds[1] : 11
+outFds[0] : 13 outFds[1] : 14
+	cgi true
+inFds[0] : 10inFds[1]11
+outFds[0] : 13outFds[1]14
+
+
+ WRITE EVENT : 11
+FILE WRITE : 11
+Write size : 20
+PIPE WRITE COMPLETE
+		RESULT OF CGI WRITE : 2
+
+close : 11
+handleErrorEvent : 11
+
+
+ WRITE EVENT : 11
+FILE READ : 13
+size : 21
+21<<<<< SIZE_READ
+size < BUFFER_SIZE
+filename=submit.html
+
+Complete
+
+
+ WRITE EVENT : 7
+CLIENT WRITE : 7
+SEND DATA
+HTTP/1.1 200
+Connection : keep-alive
+Date : Fri, 26 Jan 2023 21:28:42 GMT
+Server : 
+Content-type : text/html
+Transfer-Encoding : identity
+Content-Length : 21
+
+filename=submit.html
+	--RESPONSE SENT TO CLIENT 7--
+
+	HandleEofEvent : 6
+DeleteClient : 6
+
+--IN CLIENT : 7
+valRead :618
+
+ RESULT HEADER 
+=>accept = image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8
+=>accept-encoding = gzip, deflate, br
+=>accept-language = ko-kr,ko;q=0.9,en-us;q=0.8,en;q=0.7
+=>connection = keep-alive
+=>host = localhost:8081
+=>referer = http://localhost:8081/upload.py
+=>sec-ch-ua = "not_a brand";v="99", "google chrome";v="109", "chromium";v="109"
+=>sec-ch-ua-mobile = ?0
+=>sec-ch-ua-platform = "macos"
+=>sec-fetch-dest = image
+=>sec-fetch-mode = no-cors
+=>sec-fetch-site = same-origin
+=>user-agent = mozilla/5.0 (macintosh; intel mac os x 10_15_7) applewebkit/537.36 (khtml, like gecko) chrome/109.0.0.0 safari/537.36
+
+ --REQUEST FROM CLIENT 7--
+ :: GET /favicon.ico HTTP/1.1
+Host: localhost:8081
+Connection: keep-alive
+sec-ch-ua: "Not_A Brand";v="99", "Google Chrome";v="109", "Chromium";v="109"
+sec-ch-ua-mobile: ?0
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36
+sec-ch-ua-platform: "macOS"
+Accept: image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8
+Sec-Fetch-Site: same-origin
+Sec-Fetch-Mode: no-cors
+Sec-Fetch-Dest: image
+Referer: http://localhost:8081/upload.py
+Accept-Encoding: gzip, deflate, br
+Accept-Language: ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7
+
+
+
+
+-->FAVICON REQUESTED 
+SROUCE PATH : /Users/jinhyeok/Desktop/42seoul/git_webserver/cpp_webserver/05_refact/www/statics
+
+
+ EVFILT_TIMER : 7
+DeleteClient : 7
+
+
+ TIMER EVENT DONE-------------------------------------
+handleErrorEvent : 7
+
+
+ EVFILT_TIMER : 7
+
+
+ TIMER EVENT DONE-------------------------------------
+SERVER : 4	=>	ACCEPT : 7
+
+--IN CLIENT : 7
+valRead :618
+
+ RESULT HEADER 
+=>accept = image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8
+=>accept-encoding = gzip, deflate, br
+=>accept-language = ko-kr,ko;q=0.9,en-us;q=0.8,en;q=0.7
+=>connection = keep-alive
+=>host = localhost:8081
+=>referer = http://localhost:8081/upload.py
+=>sec-ch-ua = "not_a brand";v="99", "google chrome";v="109", "chromium";v="109"
+=>sec-ch-ua-mobile = ?0
+=>sec-ch-ua-platform = "macos"
+=>sec-fetch-dest = image
+=>sec-fetch-mode = no-cors
+=>sec-fetch-site = same-origin
+=>user-agent = mozilla/5.0 (macintosh; intel mac os x 10_15_7) applewebkit/537.36 (khtml, like gecko) chrome/109.0.0.0 safari/537.36
+
+ --REQUEST FROM CLIENT 7--
+ :: GET /favicon.ico HTTP/1.1
+Host: localhost:8081
+Connection: keep-alive
+sec-ch-ua: "Not_A Brand";v="99", "Google Chrome";v="109", "Chromium";v="109"
+sec-ch-ua-mobile: ?0
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36
+sec-ch-ua-platform: "macOS"
+Accept: image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8
+Sec-Fetch-Site: same-origin
+Sec-Fetch-Mode: no-cors
+Sec-Fetch-Dest: image
+Referer: http://localhost:8081/upload.py
+Accept-Encoding: gzip, deflate, br
+Accept-Language: ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7
+
+
+
+
+-->FAVICON REQUESTED 
+SROUCE PATH : /Users/jinhyeok/Desktop/42seoul/git_webserver/cpp_webserver/05_refact/www/statics
+
+
+ EVFILT_TIMER : 7
+DeleteClient : 7
+
+
+ TIMER EVENT DONE-------------------------------------
+handleErrorEvent : 7
+
+
+ EVFILT_TIMER : 7
+
+
+ TIMER EVENT DONE-------------------------------------
+SERVER : 4	=>	ACCEPT : 7
+SERVER : 4	=>	ACCEPT : 11
+
+--IN CLIENT : 7
+valRead :615
+
+ RESULT HEADER 
+=>accept = image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8
+=>accept-encoding = gzip, deflate, br
+=>accept-language = ko-kr,ko;q=0.9,en-us;q=0.8,en;q=0.7
+=>connection = keep-alive
+=>host = localhost:8081
+=>referer = http://localhost:8081/upload
+=>sec-ch-ua = "not_a brand";v="99", "google chrome";v="109", "chromium";v="109"
+=>sec-ch-ua-mobile = ?0
+=>sec-ch-ua-platform = "macos"
+=>sec-fetch-dest = image
+=>sec-fetch-mode = no-cors
+=>sec-fetch-site = same-origin
+=>user-agent = mozilla/5.0 (macintosh; intel mac os x 10_15_7) applewebkit/537.36 (khtml, like gecko) chrome/109.0.0.0 safari/537.36
+
+ --REQUEST FROM CLIENT 7--
+ :: GET /favicon.ico HTTP/1.1
+Host: localhost:8081
+Connection: keep-alive
+sec-ch-ua: "Not_A Brand";v="99", "Google Chrome";v="109", "Chromium";v="109"
+sec-ch-ua-mobile: ?0
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36
+sec-ch-ua-platform: "macOS"
+Accept: image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8
+Sec-Fetch-Site: same-origin
+Sec-Fetch-Mode: no-cors
+Sec-Fetch-Dest: image
+Referer: http://localhost:8081/upload
+Accept-Encoding: gzip, deflate, br
+Accept-Language: ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7
+
+
+
+
+-->FAVICON REQUESTED 
+SROUCE PATH : /Users/jinhyeok/Desktop/42seoul/git_webserver/cpp_webserver/05_refact/www/statics
+
+--IN CLIENT : 11
+valRead :885
+
+ RESULT HEADER 
+=>accept = text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9
+=>accept-encoding = gzip, deflate, br
+=>accept-language = ko-kr,ko;q=0.9,en-us;q=0.8,en;q=0.7
+=>cache-control = max-age=0
+=>connection = keep-alive
+=>content-length = 20
+=>content-type = application/x-www-form-urlencoded
+=>host = localhost:8081
+=>origin = http://localhost:8081
+=>referer = http://localhost:8081/upload
+=>sec-ch-ua = "not_a brand";v="99", "google chrome";v="109", "chromium";v="109"
+=>sec-ch-ua-mobile = ?0
+=>sec-ch-ua-platform = "macos"
+=>sec-fetch-dest = document
+=>sec-fetch-mode = navigate
+=>sec-fetch-site = same-origin
+=>sec-fetch-user = ?1
+=>upgrade-insecure-requests = 1
+=>user-agent = mozilla/5.0 (macintosh; intel mac os x 10_15_7) applewebkit/537.36 (khtml, like gecko) chrome/109.0.0.0 safari/537.36
+
+ --REQUEST FROM CLIENT 11--
+ :: POST /upload.py HTTP/1.1
+Host: localhost:8081
+Connection: keep-alive
+Content-Length: 20
+Cache-Control: max-age=0
+sec-ch-ua: "Not_A Brand";v="99", "Google Chrome";v="109", "Chromium";v="109"
+sec-ch-ua-mobile: ?0
+sec-ch-ua-platform: "macOS"
+Upgrade-Insecure-Requests: 1
+Origin: http://localhost:8081
+Content-Type: application/x-www-form-urlencoded
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9
+Sec-Fetch-Site: same-origin
+Sec-Fetch-Mode: navigate
+Sec-Fetch-User: ?1
+Sec-Fetch-Dest: document
+Referer: http://localhost:8081/upload
+Accept-Encoding: gzip, deflate, br
+Accept-Language: ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7
+
+filename=submit.html
+
+SROUCE PATH : /Users/jinhyeok/Desktop/42seoul/git_webserver/cpp_webserver/05_refact/www/cgi-bin
+
+[!]SRC FOUND 
+execPath : /Users/jinhyeok/Desktop/42seoul/git_webserver/cpp_webserver/05_refact/www/cgi-bin/upload.py
+	This is Parent of POST : 
+222
+inFds[0] : 15 inFds[1] : 16
+outFds[0] : 17 outFds[1] : 18
+	cgi true
+inFds[0] : 15inFds[1]16
+outFds[0] : 17outFds[1]18
+
+
+ WRITE EVENT : 16
+FILE WRITE : 16
+Write size : 20
+PIPE WRITE COMPLETE
+		RESULT OF CGI WRITE : 2
+
+close : 16
+handleErrorEvent : 16
+
+
+ WRITE EVENT : 16
+FILE READ : 17
+size : 21
+21<<<<< SIZE_READ
+size < BUFFER_SIZE
+filename=submit.html
+
+Complete
+
+
+ WRITE EVENT : 11
+CLIENT WRITE : 11
+SEND DATA
+HTTP/1.1 200
+Connection : close
+Date : Fri, 26 Jan 2023 21:34:55 GMT
+Server : 
+Content-type : text/html
+Transfer-Encoding : identity
+Content-Length : 21
+
+filename=submit.html
+	--RESPONSE SENT TO CLIENT 11--
+
+	HandleEofEvent : 11
+DeleteClient : 11
+	HandleEofEvent : 7
+DeleteClient : 7
+SERVER : 4	=>	ACCEPT : 7
+
+--IN CLIENT : 7
+valRead :618
+
+ RESULT HEADER 
+=>accept = image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8
+=>accept-encoding = gzip, deflate, br
+=>accept-language = ko-kr,ko;q=0.9,en-us;q=0.8,en;q=0.7
+=>connection = keep-alive
+=>host = localhost:8081
+=>referer = http://localhost:8081/upload.py
+=>sec-ch-ua = "not_a brand";v="99", "google chrome";v="109", "chromium";v="109"
+=>sec-ch-ua-mobile = ?0
+=>sec-ch-ua-platform = "macos"
+=>sec-fetch-dest = image
+=>sec-fetch-mode = no-cors
+=>sec-fetch-site = same-origin
+=>user-agent = mozilla/5.0 (macintosh; intel mac os x 10_15_7) applewebkit/537.36 (khtml, like gecko) chrome/109.0.0.0 safari/537.36
+
+ --REQUEST FROM CLIENT 7--
+ :: GET /favicon.ico HTTP/1.1
+Host: localhost:8081
+Connection: keep-alive
+sec-ch-ua: "Not_A Brand";v="99", "Google Chrome";v="109", "Chromium";v="109"
+sec-ch-ua-mobile: ?0
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36
+sec-ch-ua-platform: "macOS"
+Accept: image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8
+Sec-Fetch-Site: same-origin
+Sec-Fetch-Mode: no-cors
+Sec-Fetch-Dest: image
+Referer: http://localhost:8081/upload.py
+Accept-Encoding: gzip, deflate, br
+Accept-Language: ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7
+
+
+
+
+-->FAVICON REQUESTED 
+SROUCE PATH : /Users/jinhyeok/Desktop/42seoul/git_webserver/cpp_webserver/05_refact/www/statics
