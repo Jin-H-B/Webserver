@@ -7,8 +7,8 @@ Client::openResponse()
 	std::string srcPath = "";
 	std::string execPath = "";
 
-	int isFile = isValidTarget(this->reqParser.t_result.target);
-	if (isFile >= 400)
+	this->_statusCode = isValidTarget(this->reqParser.t_result.target);
+	if (this->_statusCode >= 400)
 	{
 		//send Error msg;
 		std::cerr << "	ERROR : INVALID TARGET\n";
@@ -18,7 +18,7 @@ Client::openResponse()
 	if (this->reqParser.t_result.method == GET)
 	{
 		std::cerr << "GET RESPONSE\n";
-		std::cerr << "isFile :" << this->_statusCode << "\n";
+		std::cerr << "statusRes :" << this->_statusCode << "\n";
 		if (this->_statusCode == 200)
 		{
 			srcPath = cwdPath + "/www/statics" + this->reqParser.t_result.target;
@@ -218,6 +218,7 @@ Client::isValidTarget(std::string &target)
 			break;
 		if (strcmp(dirent->d_name, (target).c_str()) == SUCCESS)
 		{
+			std::cout << "[!]SRC FOUND \n";
 			(target).insert(0, "/");
 			return (200);
 		}
