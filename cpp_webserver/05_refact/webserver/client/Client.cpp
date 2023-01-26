@@ -56,8 +56,8 @@ Client::openResponse()
 			std::cerr <<"ERROR: pipe\n";
 		}
 
-		int pid = fork();
-		if (pid == -1)
+		m_file.pid = fork();
+		if (m_file.pid == -1)
 		{
 			close(m_file.inFds[0]);
 			close(m_file.inFds[1]);
@@ -67,7 +67,7 @@ Client::openResponse()
 			std::cerr <<"ERROR: return 500\n";
 		}
 
-		if (pid == 0)
+		if (m_file.pid == 0)
 		{
 
 			close(m_file.inFds[1]);
@@ -79,15 +79,14 @@ Client::openResponse()
 			close(m_file.outFds[1]);
 
 			char **env = initEnv();
-			char **arg = new char *[sizeof(char *) * 3];
+			char **args = new char *[sizeof(char *) * 3];
 			std::string str = "/usr/bin/python3";
-			arg[0] = strdup(str.c_str()); //예시 "/usr/bin/python"
-			arg[1] = strdup(execPath.c_str()); //실행할 파일의 절대경로.
-			arg[2] = NULL;
+			args[0] = strdup(str.c_str());
+			args[1] = strdup(execPath.c_str());
+			args[2] = NULL;
 
-			if (execve(arg[0], arg, env) == -1)
+			if (execve(args[0], args, env) == -1)
 			{
-				std::cerr << "ERRRRRRRRRR Errno is : \n";
 				std::cerr << errno << std::endl;
 				exit(EXIT_SUCCESS);
 			}

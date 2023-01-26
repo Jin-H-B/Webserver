@@ -270,6 +270,7 @@ Connection::handleWriteEvent()
 					m_clientMap[currEvent->ident].clearResponseByte();
 					m_clientMap[currEvent->ident].clearFileEvent();
 					m_clientMap[currEvent->ident].status = Res::Complete;
+					waitpid(m_clientMap[currEvent->ident].m_file.pid, NULL, WNOHANG);
 					m_clientMap[currEvent->ident].reqParser.clearRequest();
 					if (m_clientMap[currEvent->ident].isCgi == true)
 					{
