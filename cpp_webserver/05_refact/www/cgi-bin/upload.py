@@ -1,12 +1,41 @@
-#!/usr/bin/python
-import cgi, sys
-import os
+#!/usr/local/bin/python3
+import cgi
 import cgitb
+import os
+import time
+import sys
 cgitb.enable()
-# import cgitb; cgitb.enable(display=0, logdir="./log")
 
-body = sys.stdin.read()
-print(body)
+method = os.environ['REQUEST_METHOD']
+if method == "GET":
+    print("Content-Type: text/html; charset=utf-8", flush=True)
+    print()
+    html = """
+    <form action="/form.py" method="post" enctype="multipart/form-data">
+        <p><input type="text" name="text">
+        <p><input type="file" name="file1">
+        <p><button type="submit">Submit</button>
+    </form>
+    """
+    print(html)
+elif method == "POST":
+    print("Content-Type: text/html; charset=utf-8", flush=True)
+    print()
+    # print(sys.stdin.read())
+    form = cgi.FieldStorage()
+    file = open("./test.png", "wb")
+    file.write(form.getvalue("file1"))
+
+
+# #!/usr/bin/python
+# import cgi, sys
+# import os
+# import cgitb
+# cgitb.enable()
+# # import cgitb; cgitb.enable(display=0, logdir="./log")
+
+# body = sys.stdin.read()
+# print(body)
 
 
 
