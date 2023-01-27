@@ -67,6 +67,7 @@ Client::openResponse()
 			std::cerr <<"ERROR: return 500\n";
 		}
 
+
 		if (m_file.pid == 0)
 		{
 
@@ -115,7 +116,8 @@ Client::initEnv(void)
 	env_map["AUTH_TYPE"] = "";
 	env_map["CONTENT_LENGTH"] = reqParser.t_result.header.at("content-length");
 	env_map["CONTENT_TYPE"] = reqParser.t_result.header.at("content-type");
-	env_map["UPLOAD_PATH"] = "/www/cgi-bin";
+	// std::cout << "\n IN CGI initEnv -> CONTENT_TYPE = " << reqParser.t_result.header.at("content-type") << "\n\n";
+	env_map["UPLOAD_PATH"] = "./database";
 	env_map["GATEWAY_INTERFACE"] = "CGI/1.1";
 	env_map["REQUEST_METHOD"] = reqParser.t_result.method;
 	env_map["QUERY_STRING"] = reqParser.t_result.query;

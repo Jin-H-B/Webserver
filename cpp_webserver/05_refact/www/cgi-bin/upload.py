@@ -1,14 +1,57 @@
 #!/usr/bin/python3
-import cgi, sys
-import os
-import cgitb
-cgitb.enable()
+from distutils.command.upload import upload
+import sys, os
+
+content = sys.stdin.read()
+content = content.split("\r\n")
+
+# print(content)
+
+print("<html>")
+print("<body>")
+print("<div><a href=\"/home\">Go to index</a></div>")
+
+content_type = content[2]
+print(content_type)
+# print filename
+filename = content[1].split(";")[2].split("=")[1].strip('"')
+print("<h2>")
+print("filename : " + filename)
+print("</h2>")
+
+# # save the file
+file_content = content[4]
+upload_path = str(os.environ.get("UPLOAD_PATH"))
+upload_path = "/Users/jinhyeok/Desktop/42seoul/git_webserver/cpp_webserver/04_file_read/database/"
+
+print("<h4>")
+print(upload_path)
+print("</h4>")
+print("<div>")
+
+upload_file = open(upload_path + filename, "wt")
+upload_file.write(file_content)
+upload_file.close()
+print("<h1>")
+print("FILE UPLOADED!!")
+print("</h1>")
+
+print("</div>")
+
+
+# #!/usr/bin/python3
+# import cgi, sys
+# import os
+# import cgitb
+# cgitb.enable()
 
 # form = cgi.FieldStorage()
 # print(form)
 
-body = sys.stdin.read()
-print(body)
+# print("POST.PY!!")
+
+# body = sys.stdin.read()
+# print(body)
 
 # method = os.environ['REQUEST_METHOD']
 # print(method)
