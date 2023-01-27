@@ -285,17 +285,17 @@ Client::readFile(int fd)
 	std::cout << "size : " << size << std::endl;
 	if (size < 0)
 	{
-		std::cout << "size < 0" << std::endl;
+		// std::cout << "size < 0" << std::endl;
 		return File::Error;
 	}
 	//vector<char> 로 바꾸고 미리 파일 크기 만큼   해서 용량을 미리 확보한다.
 	m_file.buffer += std::string(buffer, size);
 	m_file.size += size;
-	std::cout << m_file.size << "<<<<< SIZE_READ\n";
+	// std::cout << m_file.size << "<<<<< SIZE_READ\n";
 	if (size < BUFFER_SIZE)
 	{
-		std::cout << "size < BUFFER_SIZE" << std::endl;
-		std::cout << m_file.buffer << std::endl;
+		// std::cout << "size < BUFFER_SIZE" << std::endl;
+		// std::cout << m_file.buffer << std::endl;
 		// close(fd);
 		// _fdMap.erase(fd);
 		return File::Complete;

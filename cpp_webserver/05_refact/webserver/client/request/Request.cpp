@@ -322,10 +322,10 @@ void	Request::parseBody()
 		return ;
 	}
 	t_result.body += _buf;
-	std::cout << "\n	IN REQUEST PARSER => t_result.body.length() : " << t_result.body.length() << "\n";
-	std::cout << "	IN REQUEST PARSER => _bodyLength : " << _bodyLength << "\n";
-	// std::cout << " IN REQUEST -- body : \n" << t_result.body << "\n";
-	std::cout << " IN REQUEST -- buffer : " << _buf <<"\n\n";
+	// std::cout << "\n	IN REQUEST PARSER => t_result.body.length() : " << t_result.body.length() << "\n";
+	// std::cout << "	IN REQUEST PARSER => _bodyLength : " << _bodyLength << "\n";
+	// // std::cout << " IN REQUEST -- body : \n" << t_result.body << "\n";
+	// std::cout << " IN REQUEST -- buffer : " << _buf <<"\n\n";
 
 	_buf.clear();
 	// if (t_result.body.size() >= SIZE_MAX_BODY)
