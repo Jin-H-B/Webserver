@@ -79,11 +79,9 @@ Client::openResponse()
 			close(m_file.outFds[1]);
 
 			char **env = initEnv();
-			char **args = new char *[sizeof(char *) * 3];
-			std::string str = "/usr/bin/python3";
-			args[0] = strdup(str.c_str());
-			args[1] = strdup(execPath.c_str());
-			args[2] = NULL;
+			char **args = new char *[sizeof(char *) * 2];
+			args[0] = strdup(execPath.c_str());
+			args[1] = NULL;
 
 			if (execve(args[0], args, env) == -1)
 			{
@@ -95,7 +93,6 @@ Client::openResponse()
 		else
 		{
 			std::cout << "	This is Parent of POST : \n";
-			std::cout << "222\n";
 			std::cout << "inFds[0] : " << m_file.inFds[0] << " inFds[1] : " << m_file.inFds[1] <<std::endl;
 			std::cout << "outFds[0] : " << m_file.outFds[0] << " outFds[1] : " << m_file.outFds[1] <<std::endl;
 
