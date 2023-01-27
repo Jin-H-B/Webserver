@@ -4,12 +4,17 @@ import os
 import cgitb
 cgitb.enable()
 
+form = cgi.FieldStorage()
+print(form)
+
 # body = sys.stdin.read()
 # print(body)
 
+# method = os.environ['REQUEST_METHOD']
+# print(method)
 
-form = cgi.FieldStorage()
-print(form)
+# form = cgi.FieldStorage()
+# print(form)
 
 # # Parse the form data
 # form = cgi.FieldStorage()

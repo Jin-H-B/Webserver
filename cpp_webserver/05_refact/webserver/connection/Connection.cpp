@@ -102,9 +102,18 @@ Connection::handleReadEvent()
 	{
 		std::cout << "\n--IN CLIENT : " << currEvent->ident << "\n";
 		//system("netstat -an | grep 8080");
-		char buffer[BUFFER_SIZE + 1] = {0, };
-		ssize_t valRead = recv(currEvent->ident, buffer, BUFFER_SIZE, 0);
+
+		// char buffer[BUFFER_SIZE + 1] = {0, };
+
+		std::vector<char> reqBuffer(BUFFER_SIZE);
+		int valRead = recv(currEvent->ident, reqBuffer.data(), reqBuffer.size(), 0);
+
 		std::cout << "valRead :" << valRead << std::endl;
+		// std::cout << "RECEIVED BUFFER => \n" << std::string(reqBuffer.begin(), reqBuffer.begin() + valRead) << "\n" << std::endl;
+		std::stringstream ss;
+		ss << std::string(reqBuffer.begin(), reqBuffer.begin() + valRead);
+
+
 		if (valRead == FAIL)
 		{
 			std::cerr << currEvent->ident<<"	ERROR : read() in Client Event Case\n";
@@ -124,11 +133,12 @@ Connection::handleReadEvent()
 		}
 		else if (valRead > 0)
 		{
-
-			buffer[valRead] = '\0';
-			m_clientMap[currEvent->ident].reqParser.makeRequest(buffer);
+			std::cout << "\n\nFOR REQEUST ----\n";
+			std::cout << ss.str() << "\n\n";
+			// buffer[valRead] = '\0';
+			m_clientMap[currEvent->ident].reqParser.makeRequest(ss.str());
 			m_clientMap[currEvent->ident].status = Res::None;
-
+			std::cout << "\nREQUEST STATUS => " << m_clientMap[currEvent->ident].reqParser.t_result.pStatus << "\n\n";
 			if (m_clientMap[currEvent->ident].reqParser.t_result.pStatus == Request::ParseComplete)
 			{
 				std::cout << "\n RESULT HEADER \n";
