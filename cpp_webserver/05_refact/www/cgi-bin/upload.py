@@ -1,25 +1,49 @@
 #!/usr/bin/python3
-import sys, os
-import shutil, base64
+import sys, os, base64
 
 
-content = sys.stdin.read()
-content = content.split("\r\n")
+origin = sys.stdin.read()
+content = origin.split("\r\n")
 
 # print(content)
 
 print("<html>")
 print("<body>")
 print("<div><a href=\"/home\">Go to index</a></div>")
-print(content)
-
+# print(content)
+# print(origin)
+boundary = content[0]
+content_disposition = content[1]
 content_type = content[2]
+
+
+print("<div>")
+print("boundary : ", boundary)
+print("</div>")
+
+print("<div>")
+print(content_disposition)
+print("</div>")
+
+print("<div>")
+print(content_type)
+print("</div>")
 
 # print filename
 filename = content[1].split(";")[2].split("=")[1].strip('"')
 print("<h2>")
 print("filename : " + filename)
 print("</h2>")
+
+idx1 = origin.find(content_type)
+start_idx = idx1 + len(content_type) + 2 + 2
+end_idx = origin.rfind(boundary) - 2
+
+# print(origin)
+# print(start_idx)
+# print(end_idx)
+bfile_content = origin[start_idx:end_idx]
+# print(bfile_content)
 
 # # save the file
 file_content = content[4]
@@ -37,11 +61,13 @@ print("</h4>")
 print("<div>")
 if (content_type.split(': ')[1] != "image/jpeg"):
 	upload_file = open(upload_path + filename, "w", encoding='utf-8')
-	upload_file.write(file_content)
+	upload_file.write(bfile_content)
 	upload_file.close()
 	print("<h1>")
 	print("FILE UPLOADED!!")
 	print("</h1>")
+	print(bfile_content)
+
 # elif content_type.split(': ')[1] == "image/jpeg":
 #     # Encode the binary data as a base64 string
 #     encoded_file_content = base64.b64encode(file_content)
@@ -50,19 +76,17 @@ if (content_type.split(': ')[1] != "image/jpeg"):
 #         f.write(base64.b64decode(encoded_file_content))
         # print(base64.b64decode(encoded_file_content).decode())
 elif content_type.split(': ')[1] == "image/jpeg":
-	with open(upload_path + filename, "wb") as f:
-		binary_data = base64.b64decode(file_content)
-		f.write(binary_data)
-
+	# encoded_file_content = base64.b64encode(bfile_content)
+	f = open(upload_path + filename, "wt")
+	f.write(bfile_content)
 	print("<h1>")
 	print("FILE UPLOADED!!")
 	print("</h1>")
+	print(bfile_content)
 
-else:
-    print("<h1>")
-    print("ONLY TEXT UPLOAD")
-    print("</h1>")
 print("</div>")
+print("</body>")
+print("</html>")
 # "r" - Read - Default value. Opens a file for reading, error if the file does not exist
 # "a" - Append - Opens a file for appending, creates the file if it does not exist
 # "w" - Write - Opens a file for writing, creates the file if it does not exist
@@ -72,13 +96,6 @@ print("</div>")
 
 
 # print contents
-file_contents = content[4].split('\n')
-for line in file_contents:
-    print("<div>")
-    print("%s" %line)
-    print("</div>")
-print("</body>")
-print("</html>")
 
 
 # #!/usr/bin/python3

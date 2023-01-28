@@ -282,7 +282,6 @@ Connection::handleWriteEvent()
 					m_clientMap[currEvent->ident].clearResponseByte();
 					m_clientMap[currEvent->ident].clearFileEvent();
 					m_clientMap[currEvent->ident].status = Res::Complete;
-					waitpid(m_clientMap[currEvent->ident].m_file.pid, NULL, WNOHANG);
 					m_clientMap[currEvent->ident].reqParser.clearRequest();
 					if (m_clientMap[currEvent->ident].isCgi == true)
 					{
@@ -290,6 +289,7 @@ Connection::handleWriteEvent()
 						m_clientMap[currEvent->ident].cgiOutPath = "";
 						m_clientMap[currEvent->ident].cgiOutTarget = "";
 					}
+					waitpid(m_clientMap[currEvent->ident].m_file.pid, NULL, WNOHANG);
 				break;
 			}
 
@@ -311,7 +311,6 @@ Connection::handleWriteEvent()
 				break;
 
 			case Write::Complete:
-
 				//자원정리
 				enrollEventToChangeList(m_fileMap[currEvent->ident]->m_file.outFds[0], EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
 				fcntl(m_fileMap[currEvent->ident]->m_file.outFds[0], F_SETFL, O_NONBLOCK);
