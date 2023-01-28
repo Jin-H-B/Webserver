@@ -5,13 +5,49 @@
 </head>
 <body>
 	<div><a href="/home">Go to index</a></div>
-	<button onclick="deleteResource('delete.py')">Delete</button>
+	<form>
+		<input type="text" id="file-name" name="file-name">
+		<button onclick="deleteResource('delete.py')">Delete</button>
+	</form>
 	<script>
 		function deleteResource(url) {
+			const formData = new FormData();
+			formData.append("file-name", document.getElementById("file-name").value);
 			fetch(url, {
-			  method: 'DELETE'
+			  method: 'DELETE',
+			  body: formData
 			});
 		  }
 	</script>
 </body>
 </html>
+
+
+
+
+
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Little Webserver</title>
+</head>
+<body>
+	<div><a href="/home">Go to index</a></div>
+	<form>
+		<label for="file-name">file name:</label>
+		<input type="text" id="file-name" name="file-name">
+		<button type="button" onclick="deletefile()">Delete</button>
+	</form>
+
+	<script>
+		function deletefile() {
+		  var item_name = document.getElementById("item-name").value;
+		  fetch('delete.py', {
+			method: 'DELETE',
+			body: item_name
+		  })
+		}
+	</script>
+</body>
+</html>
+ -->

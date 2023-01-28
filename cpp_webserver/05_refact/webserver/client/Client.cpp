@@ -1,7 +1,6 @@
 #include "Client.hpp"
 
-void
-Client::openResponse()
+void Client::openResponse()
 {
 	std::string cwdPath = this->getCwdPath();
 	std::string srcPath = "";
@@ -10,9 +9,9 @@ Client::openResponse()
 	this->_statusCode = isValidTarget(this->reqParser.t_result.target);
 	if (this->_statusCode >= 400)
 	{
-		//send Error msg;
+		// send Error msg;
 		std::cerr << "	ERROR : INVALID TARGET\n";
-		return ;
+		return;
 	}
 
 	if (this->reqParser.t_result.method == GET)
@@ -25,7 +24,7 @@ Client::openResponse()
 			this->status = Res::Making;
 			int fd = -1;
 			struct stat ss;
-			std::cout << "srcPath : "<<srcPath << std::endl;
+			std::cout << "srcPath : " << srcPath << std::endl;
 			if (stat(srcPath.c_str(), &ss) == -1 || S_ISREG(ss.st_mode) != true || (fd = open(srcPath.c_str(), O_RDONLY)) == -1)
 				this->_statusCode = 500;
 			else
@@ -38,22 +37,23 @@ Client::openResponse()
 		if (this->_statusCode == 404 || this->_statusCode == 500)
 		{
 			std::cerr << "	NO FILE FOUND\n";
-			//404 response
+			// 404 response
 		}
 	}
+
 	if (this->reqParser.t_result.method == POST || this->reqParser.t_result.method == DELETE)
 	{
 		cwdPath = this->getCwdPath();
 		execPath = getCwdPath() + "/www/cgi-bin" + reqParser.t_result.target;
-		std::cout << "execPath : " <<execPath << std::endl;
+		std::cout << "execPath : " << execPath << std::endl;
 
 		if (pipe(m_file.inFds) == -1)
-			std::cerr <<"ERROR: pipe\n";
+			std::cerr << "ERROR: pipe\n";
 		if (pipe(m_file.outFds) == -1)
 		{
 			close(m_file.inFds[0]);
 			close(m_file.inFds[1]);
-			std::cerr <<"ERROR: pipe\n";
+			std::cerr << "ERROR: pipe\n";
 		}
 
 		m_file.pid = fork();
@@ -64,13 +64,11 @@ Client::openResponse()
 
 			close(m_file.outFds[0]);
 			close(m_file.outFds[1]);
-			std::cerr <<"ERROR: return 500\n";
+			std::cerr << "ERROR: return 500\n";
 		}
-
 
 		if (m_file.pid == 0)
 		{
-
 			close(m_file.inFds[1]);
 			dup2(m_file.inFds[0], STDIN_FILENO);
 			close(m_file.inFds[0]);
@@ -87,15 +85,14 @@ Client::openResponse()
 			if (execve(args[0], args, env) == -1)
 			{
 				std::cerr << errno << std::endl;
-				exit(EXIT_SUCCESS);
+				exit(EXIT_FAILURE);
 			}
-			exit(0);
 		}
 		else
 		{
 			std::cout << "	This is Parent of POST : \n";
-			std::cout << "inFds[0] : " << m_file.inFds[0] << " inFds[1] : " << m_file.inFds[1] <<std::endl;
-			std::cout << "outFds[0] : " << m_file.outFds[0] << " outFds[1] : " << m_file.outFds[1] <<std::endl;
+			std::cout << "inFds[0] : " << m_file.inFds[0] << " inFds[1] : " << m_file.inFds[1] << std::endl;
+			std::cout << "outFds[0] : " << m_file.outFds[0] << " outFds[1] : " << m_file.outFds[1] << std::endl;
 
 			close(m_file.inFds[0]);
 			close(m_file.outFds[1]);
@@ -105,8 +102,51 @@ Client::openResponse()
 			isCgi = true;
 			status = Res::Making;
 		}
-
 	}
+
+	// if (this->reqParser.t_result.method == DELETE)
+	// {
+	// 	cwdPath = this->getCwdPath();
+	// 	execPath = getCwdPath() + "/www/cgi-bin" + reqParser.t_result.target;
+	// 	std::cout << "execPath : " << execPath << std::endl;
+
+	// 	if (pipe(m_file.outFds) == -1)
+	// 	{
+	// 		std::cerr <<"ERROR: pipe\n";
+	// 	}
+
+	// 	m_file.pid = fork();
+	// 	if (m_file.pid == -1)
+	// 	{
+	// 		close(m_file.outFds[0]);
+	// 		close(m_file.outFds[1]);
+	// 		std::cerr <<"ERROR: return 500\n";
+	// 	}
+
+	// 	if (m_file.pid == 0)
+	// 	{
+	// 		close(m_file.outFds[0]);
+	// 		dup2(m_file.outFds[1], STDOUT_FILENO);
+	// 		close(m_file.outFds[1]);
+
+	// 		char **env = initEnv();
+	// 		char **args = new char *[sizeof(char *) * 2];
+	// 		args[0] = strdup(execPath.c_str());
+	// 		args[1] = NULL;
+
+	// 		if (execve(args[0], args, env) == -1)
+	// 		{
+	// 			std::cerr << errno << std::endl;
+	// 			exit(EXIT_FAILURE);
+	// 		}
+	// 	}
+	// 	else
+	// 	{
+	// 		close(m_file.outFds[1]);
+	// 		isCgi = true;
+	// 		status = Res::Making;
+	// 	}
+	// }
 
 	// if (this->reqParser.t_result.method == DELETE)
 	// {
@@ -158,7 +198,7 @@ Client::initEnv(void)
 	// this->set_cgi_custom_env(env_map, *(this->req_info.header_map));
 	char **cgi_env = new char *[sizeof(char *) * env_map.size() + 1];
 	int i = 0;
-	for(std::map<std::string, std::string>::iterator iter = env_map.begin(); iter != env_map.end(); iter++)
+	for (std::map<std::string, std::string>::iterator iter = env_map.begin(); iter != env_map.end(); iter++)
 	{
 		cgi_env[i] = strdup((iter->first + "=" + iter->second).c_str());
 		i++;
@@ -168,8 +208,7 @@ Client::initEnv(void)
 	return (cgi_env);
 }
 
-void
-Client::initResponse()
+void Client::initResponse()
 {
 	setStatusCode(reqParser.t_result.status);
 	setStatusMsg(_statusMap[getStatusCode()]);
@@ -184,8 +223,7 @@ Client::initResponse()
 	setBody(m_file.buffer);
 }
 
-void
-Client::startResponse()
+void Client::startResponse()
 {
 	initResponse();
 	m_resMsg += getHttpVersion() + " " + std::to_string(getStatusCode()) + CRLF;
@@ -226,10 +264,10 @@ Client::changePosition(int n)
 	return (getSendResultSize());
 }
 
-int
-Client::sendResponse()
+int Client::sendResponse()
 {
-	std::cout << "SEND DATA\n"<< getSendResult();
+	std::cout << "SEND DATA\n"
+			  << getSendResult();
 	size_t n = send(m_clientFd, getSendResult(), getSendResultSize(), 0);
 
 	if (n < 0)
@@ -240,16 +278,14 @@ Client::sendResponse()
 		return Send::Complete;
 }
 
-void
-Client::clearResponseByte()
+void Client::clearResponseByte()
 {
 	m_resMsg.clear();
 	m_sentBytes = 0;
 	m_totalBytes = 0;
 }
 
-int
-Client::isValidTarget(std::string &target)
+int Client::isValidTarget(std::string &target)
 {
 	if (target == "")
 		return 404;
@@ -301,14 +337,12 @@ Client::isValidTarget(std::string &target)
 	return (404);
 }
 
-
-int
-Client::readFile(int fd)
+int Client::readFile(int fd)
 {
 	char buffer[BUFFER_SIZE + 1];
 
 	memset(buffer, 0, sizeof(buffer));
-	//std::cout << "reading\n";
+	// std::cout << "reading\n";
 	ssize_t size = read(fd, buffer, BUFFER_SIZE);
 	std::cout << "size : " << size << std::endl;
 	if (size < 0)
@@ -316,7 +350,7 @@ Client::readFile(int fd)
 		// std::cout << "size < 0" << std::endl;
 		return File::Error;
 	}
-	//vector<char> 로 바꾸고 미리 파일 크기 만큼   해서 용량을 미리 확보한다.
+	// vector<char> 로 바꾸고 미리 파일 크기 만큼   해서 용량을 미리 확보한다.
 	m_file.buffer += std::string(buffer, size);
 	m_file.size += size;
 	// std::cout << m_file.size << "<<<<< SIZE_READ\n";
@@ -331,31 +365,29 @@ Client::readFile(int fd)
 	return File::Making;
 }
 
-void
-Client::clearFileEvent()
+void Client::clearFileEvent()
 {
 	m_file.fd = -1;
 	m_file.size = 0;
 	m_file.buffer = "";
 }
 
-int
-Client::writePipe(int fd)
+int Client::writePipe(int fd)
 {
-    size_t size;
+	size_t size;
 
-    size = write(fd, this->reqParser.t_result.body.c_str() + m_file.m_pipe_sentBytes, \
-                this->reqParser.t_result.body.length() - m_file.m_pipe_sentBytes);
-    std::cout << "Write size : " << size << std::endl;
+	size = write(fd, this->reqParser.t_result.body.c_str() + m_file.m_pipe_sentBytes,
+				 this->reqParser.t_result.body.length() - m_file.m_pipe_sentBytes);
+	std::cout << "Write size : " << size << std::endl;
 	if (size < 0)
-    {
-        return Write::Error;
-    }
-    m_file.m_pipe_sentBytes+= size;
-    if (m_file.m_pipe_sentBytes >= this->reqParser.t_result.body.length() )
-    {
+	{
+		return Write::Error;
+	}
+	m_file.m_pipe_sentBytes += size;
+	if (m_file.m_pipe_sentBytes >= this->reqParser.t_result.body.length())
+	{
 		std::cout << "PIPE WRITE COMPLETE\n";
-        return Write::Complete;
-    }
-    return Write::Making;
+		return Write::Complete;
+	}
+	return Write::Making;
 }
