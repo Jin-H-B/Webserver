@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 import sys, os, base64
 
-
 origin = sys.stdin.read()
 content = origin.split("\r\n")
 
@@ -59,7 +58,8 @@ print("<h4>")
 
 print("</h4>")
 print("<div>")
-if (content_type.split(': ')[1] != "image/jpeg"):
+
+if (content_type.split(': ')[1] != "image/jpeg" and content_type.split(': ')[1] != "image/png"):
 	upload_file = open(upload_path + filename, "w", encoding='utf-8')
 	upload_file.write(bfile_content)
 	upload_file.close()
@@ -67,22 +67,16 @@ if (content_type.split(': ')[1] != "image/jpeg"):
 	print("FILE UPLOADED!!")
 	print("</h1>")
 	print(bfile_content)
-
-# elif content_type.split(': ')[1] == "image/jpeg":
-#     # Encode the binary data as a base64 string
-#     encoded_file_content = base64.b64encode(file_content)
-#     # Write the encoded string to the file
-#     with open(upload_path + filename, "wb") as f:
-#         f.write(base64.b64decode(encoded_file_content))
-        # print(base64.b64decode(encoded_file_content).decode())
-elif content_type.split(': ')[1] == "image/jpeg":
-	# encoded_file_content = base64.b64encode(bfile_content)
-	f = open(upload_path + filename, "wt")
-	f.write(bfile_content)
+else:
+	print(bfile_content)
+	f = open(upload_path + filename, "wb")
+	res = f.write(bfile_content)
+	if (res == -1):
+		print("FAILED")
 	print("<h1>")
 	print("FILE UPLOADED!!")
 	print("</h1>")
-	print(bfile_content)
+	# print(bfile_content)
 
 print("</div>")
 print("</body>")
@@ -95,14 +89,3 @@ print("</html>")
 # "b" - Binary - Binary mode (e.g. images)
 
 
-# print contents
-
-
-# #!/usr/bin/python3
-# import cgi, sys
-# import os
-# import cgitb
-# cgitb.enable()
-
-# form = cgi.FieldStorage()
-# print(form)

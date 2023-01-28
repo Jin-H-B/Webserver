@@ -45,6 +45,7 @@ void Client::openResponse()
 	{
 		cwdPath = this->getCwdPath();
 		execPath = getCwdPath() + "/www/cgi-bin" + reqParser.t_result.target;
+		std::cout << "METHOD : " << reqParser.t_result.method <<"\n";
 		std::cout << "execPath : " << execPath << std::endl;
 
 		if (pipe(m_file.inFds) == -1)
