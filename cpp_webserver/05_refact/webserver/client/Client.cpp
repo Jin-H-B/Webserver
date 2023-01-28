@@ -41,7 +41,7 @@ Client::openResponse()
 			//404 response
 		}
 	}
-	if (this->reqParser.t_result.method == POST)
+	if (this->reqParser.t_result.method == POST || this->reqParser.t_result.method == DELETE)
 	{
 		cwdPath = this->getCwdPath();
 		execPath = getCwdPath() + "/www/cgi-bin" + reqParser.t_result.target;
@@ -107,6 +107,31 @@ Client::openResponse()
 		}
 
 	}
+
+	// if (this->reqParser.t_result.method == DELETE)
+	// {
+	// 	int pid = fork();
+	// 	if (pid == 0)
+	// 	{
+	// 		std::cerr << "\n\nTHIS IS DELETE METHOD \n\n";
+	// 		std::string uploadPath = cwdPath + "/database/";
+
+	// 		/* all files delete in uploaded dir */
+	// 		DIR *dir = opendir(uploadPath.c_str());
+	// 		struct dirent *dirent = NULL;
+	// 		while (true)
+	// 		{
+	// 			dirent = readdir(dir);
+	// 			if (!dirent)
+	// 				break;
+	// 			// std::cout << dirent->d_name << "\n";
+	// 			if (strcmp(dirent->d_name, ".") != 0 && strcmp(dirent->d_name, ".."))
+	// 			{
+	// 				std::string delPath = uploadPath + dirent->d_name;
+	// 				unlink(delPath.c_str());
+	// 			}
+	// 		}
+	// 	}
 }
 
 char **
@@ -232,16 +257,20 @@ Client::isValidTarget(std::string &target)
 		target = "index.html";
 	else if (target == "/submit")
 		target = "submit.html";
+	else if (target == "/delete")
+		target = "delete.html";
 	else if (target == "/upload")
 		target = "upload.html";
 	else if (target == "/server")
 		target = "server.html";
 	else if (target == "/post.py")
-        target = "post.py";
-    else if (target == "/upload.py")
-        target = "upload.py";
-    else if (target == "/submit.py")
-        target = "submit.py";
+		target = "post.py";
+	else if (target == "/upload.py")
+		target = "upload.py";
+	else if (target == "/submit.py")
+		target = "submit.py";
+	else if (target == "/delete.py")
+		target = "delete.py";
 	else if (target == "/image.jpeg")
 		target = "image.jpeg";
 
@@ -250,7 +279,7 @@ Client::isValidTarget(std::string &target)
 
 	std::string srcPath;
 	srcPath = this->getCwdPath() + "/www/statics";
-	if (this->reqParser.t_result.method == POST)
+	if (this->reqParser.t_result.method == POST || this->reqParser.t_result.method == DELETE)
 		srcPath = this->getCwdPath() + "/www/cgi-bin";
 
 	std::cout << "SROUCE PATH : " << srcPath << std::endl;

@@ -1,7 +1,6 @@
 #!/usr/bin/python3
-from distutils.command.upload import upload
 import sys, os
-import shutil
+import shutil, base64
 
 
 content = sys.stdin.read()
@@ -12,6 +11,7 @@ content = content.split("\r\n")
 print("<html>")
 print("<body>")
 print("<div><a href=\"/home\">Go to index</a></div>")
+print(content)
 
 content_type = content[2]
 
@@ -36,16 +36,23 @@ print("<h4>")
 print("</h4>")
 print("<div>")
 if (content_type.split(': ')[1] != "image/jpeg"):
-	upload_file = open(upload_path + filename, "w")
+	upload_file = open(upload_path + filename, "w", encoding='utf-8')
 	upload_file.write(file_content)
 	upload_file.close()
 	print("<h1>")
 	print("FILE UPLOADED!!")
 	print("</h1>")
+# elif content_type.split(': ')[1] == "image/jpeg":
+#     # Encode the binary data as a base64 string
+#     encoded_file_content = base64.b64encode(file_content)
+#     # Write the encoded string to the file
+#     with open(upload_path + filename, "wb") as f:
+#         f.write(base64.b64decode(encoded_file_content))
+        # print(base64.b64decode(encoded_file_content).decode())
 elif content_type.split(': ')[1] == "image/jpeg":
-	with open(upload_path + filename, "w") as f:
-		print(file_content)
-		f.write(bytes(file_content, 'utf-8'))
+	with open(upload_path + filename, "wb") as f:
+		binary_data = base64.b64decode(file_content)
+		f.write(binary_data)
 
 	print("<h1>")
 	print("FILE UPLOADED!!")
