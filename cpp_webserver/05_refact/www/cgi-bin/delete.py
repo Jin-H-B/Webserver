@@ -26,4 +26,3 @@ print("<h1>")
 print("</h1>")
 print("</body>")
 print("</html>")
-
