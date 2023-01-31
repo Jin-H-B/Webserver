@@ -21,6 +21,7 @@ class Client : public ResponseInfo
 		size_t m_sentBytes;
 		std::string cgiOutPath;
 		std::string cgiOutTarget;
+		std::string autoIndexPath;
 
 	public:
 		int status;
@@ -32,8 +33,12 @@ class Client : public ResponseInfo
 	public:
 		void openResponse();
 		void openErrorResponse(int errorCode);
+		void initHeader();
+		void makeResult();
 		void initResponse();
 		void startResponse();
+		void startAutoindex();
+		void startShowFile();
 		void openfile(std::string targetPath);
 		std::string getExecvePath();
 
@@ -47,6 +52,7 @@ class Client : public ResponseInfo
 		std::string cgiFinder(std::string target);
 		int isValidTarget(std::string &target);
 		int openDirectory(std::string &target);
+		int checkAutoListing();
 
 	public:
 		int writePipe(int fd);
@@ -56,7 +62,7 @@ class Client : public ResponseInfo
 
 	public:
 		Client()
-		: m_clientFd(-1), ptr_server(NULL), status(0), path("") {}
+		: m_clientFd(-1), ptr_server(NULL), autoIndexPath(""), status(0), path("") {}
 
 
 	public:

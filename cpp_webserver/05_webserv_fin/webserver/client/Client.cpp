@@ -18,9 +18,23 @@ Client::openResponse()
 	{
 		if (_statusCode == AUTO) //autoindex
 		{
-			std::cout << "  autoindext \n";
+			std::cout << "  AUTOINDEX \n";
 			this->_statusCode = 200;
-			//readyToAutoindex();
+			startAutoindex();
+			if (this->_statusCode >= 400)
+			{
+				openErrorResponse(_statusCode);
+				std::cerr << "	ERROR : INVALID TARGET\n";
+			}
+			else if (_statusCode == INDEX)
+			{
+				this->_statusCode = 200;
+				std::cout << "download!\n";
+				std::cout << "ppp = " << path << std::endl;
+				path = path.substr(0, path.length() - 1);
+				std::cout << "new path : " << path << std::endl;
+				startShowFile();
+			}
 			return ;
 		}
 
@@ -168,7 +182,11 @@ Client::openfile(std::string targetPath)
 	struct stat ss;
 	if (stat(tmpPath.c_str(), &ss) == -1 || S_ISREG(ss.st_mode) != true ||
 		(fd = open(tmpPath.c_str(), O_RDONLY)) == -1)
-		std::cout << "errorPath failier" << std::endl;
+	{
+		this->status = Res::Error;
+		this->_statusCode = 500;
+		openErrorResponse(_statusCode);
+	}
 	else
 	{
 		std::cout <<"file size = "<< ss.st_size << std::endl;
@@ -239,12 +257,25 @@ Client::initResponse()
 	setTransferEncoding("identity");
 	setContentLength(m_file.buffer.size());
 	setBody(m_file.buffer);
+
 }
 
 void
-Client::startResponse()
+Client::initHeader()
 {
-	initResponse();
+	setServer("webserv");
+	setStatusMsg(_statusMap[getStatusCode()]);
+	setDate();
+	if (this->reqParser.t_result.close == true)
+		setConnection("close");
+	else
+		setConnection("keep-alive");
+	setAcceptRange("bytes");
+}
+
+void
+Client::makeResult()
+{
 	m_resMsg += getHttpVersion() + " " + std::to_string(getStatusCode())  + " " + getStatusMsg() + CRLF;
 	m_resMsg += "Connection : " + getConnection() + CRLF;
 	m_resMsg += "Date : " + getDate() + CRLF;
@@ -253,8 +284,66 @@ Client::startResponse()
 	m_resMsg += "Transfer-Encoding : " + getTransferEncoding() + CRLF;
 	m_resMsg += "Content-Length : " + std::to_string(getContentLength()) + CRLF;
 	m_resMsg += "\n";
-	m_resMsg += m_file.buffer;
+	m_resMsg += getResponseBody();
 	m_totalBytes = m_resMsg.size();
+}
+
+void
+Client::startResponse()
+{
+	initResponse();
+	makeResult();
+}
+
+void
+Client::startAutoindex()
+{
+	std::string body;
+
+	initHeader();
+	setContentType("text/html");
+
+	DIR *dir;
+	if ((dir = opendir(path.c_str())))
+	{
+		std::string index = "Index of  " +  m_file.srcPath;
+		body = "<!DOCTYPE html><html><head>    <title> " + index + "</title></head><body bg color='white'><h1>" + index +" </h1><hr>  <pre>\n";
+		struct dirent *dirent = NULL;
+		while (true)
+		{
+			dirent = readdir(dir);
+			if (!dirent)
+				break;
+			if (strcmp(dirent->d_name, ".") == SUCCESS || strcmp(dirent->d_name, "..") == SUCCESS)
+				continue;
+
+			std::cout << "ptr_server->m_ipAddress : "<< ptr_server->m_ipAddress <<"\n";
+			body += "    <a href= " + m_file.srcPath  + dirent->d_name +"/" + ">" + dirent->d_name +"</a><br>";
+		}
+		closedir(dir);
+		body += "</pre>  <hr></body></html>";
+		setBody(body);
+		setContentLength(body.length());
+		makeResult();
+	}
+	else
+	{
+		switch (errno)
+		{
+			case ENOTDIR:
+				_statusCode = INDEX;
+				break ;
+			case EACCES:
+				_statusCode = 403;
+				break ;
+			case ENOENT:
+				_statusCode = 404;
+				break ;
+			default:
+				_statusCode = 500;
+		}
+	}
+
 }
 
 const char *
@@ -350,6 +439,12 @@ Client::isValidTarget(std::string &target)
 		std::cout << "cgi!! : " << path << "\n";
 		return (200);
 	}
+	if (target.compare(0, sizeof("/database/") - 1, "/database/") == SUCCESS)
+	{
+		m_file.srcPath = this->getCwdPath() + target;
+		std::cout << "download!! : " << path << "\n";
+		return (200);
+	}
 	else
 	{
 		std::map<std::string, Location>::iterator it = ptr_server->m_location.begin();
@@ -368,12 +463,18 @@ Client::isValidTarget(std::string &target)
 				}
 				else if (this->status != Res::Error && it->second.autoListing == true)
 				{
-					m_file.srcPath = path + "/";
+					m_file.srcPath = "/" + it->second.root + "/";
 					return (AUTO);
 				}
 				else
 					return (openDirectory(target));
 			}
+		}
+		if (checkAutoListing())
+		{
+			path = getCwdPath() + reqParser.t_result.target;
+			m_file.srcPath = reqParser.t_result.target;
+			return (AUTO);
 		}
 	}
 	if (m_file.srcPath  != "")
@@ -383,6 +484,20 @@ Client::isValidTarget(std::string &target)
 		return (200);
 	}
 	return (404);
+}
+
+int
+Client::checkAutoListing()
+{
+	std::cout << "checkoutAutoListing target : " << reqParser.t_result.target << std::endl;
+	std::cout << reqParser.t_result.target.rfind("/") << std::endl;
+	std::cout <<reqParser.t_result.target.size()<< std::endl;
+	if (reqParser.t_result.target != "/" && (reqParser.t_result.target.rfind("/")) == reqParser.t_result.target.size() - 1)
+	{
+		std::cout << "checkoutAutoListing\n";
+		return 1;
+	}
+	return 0;
 }
 
 int
@@ -486,6 +601,7 @@ Client::clearFileEvent()
 	m_file.isFile = 0;
 	m_file.srcPath ="";
 	this->path = "";
+	this->autoIndexPath = "";
 }
 
 int
@@ -508,6 +624,19 @@ Client::writePipe(int fd)
         return Write::Complete;
     }
     return Write::Making;
+}
+
+void
+Client::startShowFile()
+{
+	std::string body;
+
+	body = "<!DOCTYPE html><html><body><img src=" + path;
+
+	body += " alt="" srcset=""></body></html>";
+	setBody(body);
+	setContentLength(body.length());
+	makeResult();
 }
 
 std::map<std::string, std::string>
