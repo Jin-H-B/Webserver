@@ -1,7 +1,8 @@
 #!/usr/bin/perl -w
 use CGI;
+use Env;
 
-$upload_dir = "/Users/jinhyeok/Desktop/42webserv/database";
+$upload_dir = $ENV{'UPLOAD_PATH'};
 
 $query = new CGI;
 
@@ -20,6 +21,7 @@ close UPLOADFILE;
 
 print "Status: 200 OK\r\n";
 print $query->header ( );
+
 print <<END_HTML;
 <HTML>
 <HEAD>
