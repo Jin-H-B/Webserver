@@ -34,9 +34,11 @@ Connection::handleEofEvent()
 	{
 		if (m_clientMap[currEvent->ident].status == -1)
 		{
+			std::cout << "aaaaaa \n" << std::endl;
 			deleteClient(currEvent->ident);
 		}
 	}
+
 }
 
 void
@@ -57,7 +59,7 @@ Connection::deleteClient(int socket)
 	if (m_clientMap.find(socket) == m_clientMap.end())
 		return ;
 	std::map <int, Client*>::iterator it;
-	std::cout << "m_fileMap size : " << m_fileMap.size() << std::endl;
+	std::cout << "111m_fileMap size : " << m_fileMap.size() << std::endl;
 	for (it = m_fileMap.begin(); it != m_fileMap.end(); it++)
 	{
 		if (it->second->m_clientFd == (int)socket)
@@ -103,7 +105,7 @@ void
 Connection::handleWriteEvent()
 {
 	std::cout << "\n\n WRITE EVENT : " << currEvent->ident << std::endl;
-
+	
 /* Client Event Case */
 	if (m_clientMap.find(currEvent->ident) != m_clientMap.end())
 	{
@@ -154,6 +156,7 @@ Connection::handleWriteEvent()
 		{
 		case Write::Error:
 			m_clientMap.erase(currEvent->ident);
+			//자원정리
 			close(currEvent->ident);
 			break;
 
@@ -162,6 +165,8 @@ Connection::handleWriteEvent()
 
 		case Write::Complete:
 			enrollEventToChangeList(m_fileMap[currEvent->ident]->m_file.outFds[0], EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
+
+			//자원정리
 			enrollEventToChangeList(currEvent->ident, EVFILT_WRITE, EV_DELETE | EV_DISABLE, 0, 0, NULL);
 			close(currEvent->ident);
 			m_fileMap.erase(currEvent->ident);
@@ -174,9 +179,11 @@ Connection::handleWriteEvent()
 void
 Connection::handleErrorEvent()
 {
+
 	std::cout << "handleErrorEvent : " << currEvent->ident << std::endl;
 	if (m_serverMap.find(currEvent->ident) != m_serverMap.end())
 	{
+		std::cout << "1111111\n";
 		if (m_clientMap.empty() == true)
 			return ;
 		this->m_serverMap.erase(this->m_serverMap.find(currEvent->ident));
@@ -184,14 +191,20 @@ Connection::handleErrorEvent()
 	}
 	else if (this->m_clientMap.find(currEvent->ident) != this->m_clientMap.end())
 	{
+		std::cout << "2222\n";
+		//m_fileMap.find()
 		this->m_clientMap.erase(this->m_clientMap.find(currEvent->ident));
 		close(currEvent->ident);
+		//map 도 지우기
 	}
 	if (this->m_fileMap.find(currEvent->ident) != this->m_fileMap.end())
 	{
+		std::cout << "3333\n";
 		this->m_fileMap.erase(this->m_fileMap.find(currEvent->ident));
 		close(currEvent->ident);
 	}
+	// this->m_fileMap.erase(this->m_fileMap.find(currEvent->ident));
+	// close(currEvent->ident);
 }
 
 void
@@ -251,7 +264,7 @@ Connection::clientReadEvent()
 	std::stringstream ss;
 	ss << std::string(reqBuffer.begin(), reqBuffer.begin() + valRead);
 	std::cout << "valRead :" << valRead << std::endl;
-
+	
 	if (valRead == FAIL)
 	{
 		std::cerr << currEvent->ident<<"	ERROR : read() in Client Event Case\n";
@@ -280,7 +293,9 @@ Connection::clientReadEvent()
 			// std::cout << "\n --REQUEST FROM CLIENT " << currEvent->ident << "--\n :: "
 			// 			  << m_clientMap[currEvent->ident].reqParser.t_result.orig << "\n\n";
 			//m_clientMap[currEvent->ident].reqParser.t_result.orig = "";
-
+			std::cout << "\n\n\nprintRequest\n";
+			m_clientMap[currEvent->ident].reqParser.printRequest();
+			std::cout << "\n\n\n";
 			if (m_clientMap[currEvent->ident].status == Res::None)
 			{
 				m_clientMap[currEvent->ident].openResponse();

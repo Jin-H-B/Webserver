@@ -12,11 +12,11 @@ Client::openResponse()
 		std::cerr << "	ERROR : INVALID TARGET\n";
 		return ;
 	}
-
+	
 	std::cout << "statusRes :" << this->_statusCode << "\n";
 	if (this->reqParser.t_result.method == GET)
 	{
-		if (_statusCode == AUTO) //autoindex
+		if (_statusCode == AUTO) //autoindex 
 		{
 			std::cout << "  autoindext \n";
 			this->_statusCode = 200;
@@ -43,7 +43,7 @@ Client::openResponse()
 		/*
 			file open logic!
 		*/
-		char **env = initEnv();
+		char **env = init_env();
 		if (pipe(m_file.inFds) == -1)
 			std::cerr <<"ERROR: pipe\n";
 		if (pipe(m_file.outFds) == -1)
@@ -52,7 +52,7 @@ Client::openResponse()
 			close(m_file.inFds[1]);
 			std::cerr <<"ERROR: pipe\n";
 		}
-
+	
 		m_file.pid = fork();
 		if (m_file.pid == -1)
 		{
@@ -70,13 +70,13 @@ Client::openResponse()
 			close(m_file.inFds[1]);
 			dup2(m_file.inFds[0], STDIN_FILENO);
 			close(m_file.inFds[0]);
-
+			
 			close(m_file.outFds[0]);
 			dup2(m_file.outFds[1], STDOUT_FILENO);
 			close(m_file.outFds[1]);
 
 			char **arg = new char *[sizeof(char *) * 3];
-
+	
 			std::string str = getExecvePath();
 
 			arg[0] = strdup(str.c_str()); //예시 "/usr/bin/python3"
@@ -111,44 +111,41 @@ Client::openResponse()
 }
 
 char **
-Client::initEnv(void)
+Client::init_env(void)
 {
 	std::map<std::string, std::string> env_map;
+	
 	env_map["AUTH_TYPE"] = ""; // 인증과정 없으므로 NULL
 	env_map["CONTENT_LENGTH"] = reqParser.t_result.header.at("Content-Length");
 	env_map["CONTENT_TYPE"] = reqParser.t_result.header.at("Content-Type");
 	env_map["UPLOAD_PATH"] = getCwdPath() + "/database/";
-	env_map["GATEWAY_INTERFACE"] = "CGI/1.1";
-	env_map["REQUEST_METHOD"] = "POST";
+	env_map["REQUEST_METHOD"] = getMethod(reqParser.t_result.method);
 	env_map["QUERY_STRING"] = reqParser.t_result.query;
 	env_map["REMOTE_ADDR"] = ptr_server->m_ipAddress;
-	env_map["REMOTE_USER"] = "";
-	env_map["SERVER_NAME"] = "127.0.0.1";
-	env_map["SERVER_PORT"] = "8080";
+	env_map["REMOTE_USER"] = ""; // 인증과정 없으므로 NULL
+	env_map["SERVER_NAME"] = ptr_server->m_ipAddress;
+	env_map["SERVER_PORT"] = std::to_string(ptr_server->m_port);
+	env_map["GATEWAY_INTERFACE"] = "CGI/1.1";
 	env_map["SERVER_PROTOCOL"] = "HTTP/1.1";
 	env_map["SERVER_SOFTWARE"] = "webserv/1.1";
-	env_map["PATH_INFO"] = "/usr/bin/perl";
-	env_map["REQUEST_URI"] = "/usr/bin/perl";
 	env_map["SCRIPT_NAME"] = "webserv/1.1";
-	std::cout << "	headder!\n";
+	env_map["PATH_INFO"] = getExecvePath();
+	env_map["REQUEST_URI"] = getExecvePath();
+
 	std::map<std::string, std::string>::iterator it;
 	for (it = reqParser.t_result.header.begin(); it != reqParser.t_result.header.end(); it++)
 	{
-
 		std::string::size_type sub;
 		std::string str = it->first;
 		for (unsigned long i = 0; i < str.size(); i++) { str[i] = std::toupper(str[i]); }
-		while ((sub = str.rfind("-")) != std::string::npos)
-		{
-			str = str.replace(sub, 1, 1, '_');
-		}
+		while ((sub = str.rfind("-")) != std::string::npos) { str = str.replace(sub, 1, 1, '_'); }
 		str.insert(0, "HTTP_");
 		env_map[str] = it->second;
 	}
-	std::cout << "	ENV!\n";
-	std::map<std::string, std::string>::iterator it2;
-	for (it2 = env_map.begin() ; it2 != env_map.end(); it2++)
-		std::cout << it2->first << " : [" << it2->second << "]\n";
+	// std::cout << "	ENV!\n";
+	// std::map<std::string, std::string>::iterator it2;
+	// for (it2 = env_map.begin() ; it2 != env_map.end(); it2++)
+	// 	std::cout << it2->first << " : [" << it2->second << "]\n";
 
 	char **cgi_env = new char *[sizeof(char *) * env_map.size() + 1];
 	int i = 0;
@@ -182,7 +179,7 @@ Client::openfile(std::string targetPath)
 	}
 }
 
-void
+void 
 Client::openErrorResponse(int errorCode)
 {
 	this->status = Res::Error;
@@ -361,7 +358,7 @@ Client::isValidTarget(std::string &target)
 				}
 				else
 					return (openDirectory(target));
-			}
+			}		
 		}
 	}
 	if (m_file.srcPath  != "")
@@ -390,7 +387,7 @@ Client::openDirectory(std::string &target)
 	}
 	else if ((sub = target.rfind("/")) != std::string::npos)
 		target = target.substr(sub + 1);
-
+	
 	std::cout << "SROUCE target : " << target << std::endl;
 
 	DIR *dir;
@@ -414,7 +411,7 @@ Client::openDirectory(std::string &target)
 		closedir(dir);
 		return (404);
 	}
-	else
+	else 
 	{
 		switch (errno)
 		{
@@ -443,7 +440,7 @@ Client::readFile(int fd)
 		std::cout << "size < 0" << std::endl;
 		return File::Error;
 	}
-
+	//vector<char> 로 바꾸고 미리 파일 크기 만큼   해서 용량을 미리 확보한다.
 	m_file.buffer += std::string(buffer, size);
 	m_file.size += size;
 	std::cout << m_file.size << "<<<<< SIZE_READ\n";
