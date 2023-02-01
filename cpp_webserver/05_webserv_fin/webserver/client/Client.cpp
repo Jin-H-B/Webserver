@@ -40,7 +40,7 @@ Client::openResponse()
 
 		/* hard coding for favicon.ico */
 		if (reqParser.t_result.target == "/favicon.ico")
-			m_file.srcPath = getCwdPath() + "/favicon.ico";
+			m_file.srcPath = getCwdPath() + "/www/statics/favicon.ico";
 		std::cout << "[!] srcPath : " << m_file.srcPath << "\n\n";
 
 		int fd = -1;
