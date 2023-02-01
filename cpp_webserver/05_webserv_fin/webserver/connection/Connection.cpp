@@ -105,7 +105,7 @@ void
 Connection::handleWriteEvent()
 {
 	std::cout << "\n\n WRITE EVENT : " << currEvent->ident << std::endl;
-	
+
 /* Client Event Case */
 	if (m_clientMap.find(currEvent->ident) != m_clientMap.end())
 	{
@@ -264,7 +264,7 @@ Connection::clientReadEvent()
 	std::stringstream ss;
 	ss << std::string(reqBuffer.begin(), reqBuffer.begin() + valRead);
 	std::cout << "valRead :" << valRead << std::endl;
-	
+
 	if (valRead == FAIL)
 	{
 		std::cerr << currEvent->ident<<"	ERROR : read() in Client Event Case\n";

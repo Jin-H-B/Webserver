@@ -40,6 +40,12 @@ Client::openResponse()
 
 		int fd = -1;
 		struct stat ss;
+
+		/* hard coding for favicon.ico */
+		if (reqParser.t_result.target == "/favicon.ico")
+			m_file.srcPath = getCwdPath() + "/favicon.ico";
+		std::cout << "[!] srcPath : " << m_file.srcPath << "\n\n";
+
 		if (stat(m_file.srcPath.c_str(), &ss) == -1 || S_ISREG(ss.st_mode) != true || (fd = open(m_file.srcPath.c_str(), O_RDONLY)) == -1)
 		{
 			this->_statusCode = 500;
@@ -439,7 +445,7 @@ Client::isValidTarget(std::string &target)
 		std::cout << "cgi!! : " << path << "\n";
 		return (200);
 	}
-	if (target.compare(0, sizeof("/database/") - 1, "/database/") == SUCCESS)
+	else if (target.compare(0, sizeof("/database/") - 1, "/database/") == SUCCESS)
 	{
 		m_file.srcPath = this->getCwdPath() + target;
 		std::cout << "download!! : " << path << "\n";
@@ -454,7 +460,7 @@ Client::isValidTarget(std::string &target)
 			{
 				path = this->getCwdPath() + "/"+ it->second.root;
 				std::cout << "!!path : " << path << std::endl;
-				std::cout << "t->second.index.size() :" << it->second.index.size()  << "\n";
+				// std::cout << "it->second.index.size() :" << it->second.index.size()  << "\n";
 				if (it->second.index.size() > 0 )
 				{
 					m_file.srcPath = path + "/" +  it->second.index[0];
