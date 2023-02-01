@@ -38,14 +38,13 @@ Client::openResponse()
 			return ;
 		}
 
-		int fd = -1;
-		struct stat ss;
-
 		/* hard coding for favicon.ico */
 		if (reqParser.t_result.target == "/favicon.ico")
 			m_file.srcPath = getCwdPath() + "/favicon.ico";
 		std::cout << "[!] srcPath : " << m_file.srcPath << "\n\n";
 
+		int fd = -1;
+		struct stat ss;
 		if (stat(m_file.srcPath.c_str(), &ss) == -1 || S_ISREG(ss.st_mode) != true || (fd = open(m_file.srcPath.c_str(), O_RDONLY)) == -1)
 		{
 			this->_statusCode = 500;
