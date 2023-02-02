@@ -29,12 +29,15 @@ Client::openResponse()
 			else if (_statusCode == INDEX)
 			{
 				this->_statusCode = 200;
-				std::cout << "download!\n";
-				std::cout << "ppp = " << path << std::endl;
 				path = path.substr(0, path.length() - 1);
-				std::cout << "new path : " << path << std::endl;
 				startShowFile();
 			}
+			return ;
+		}
+		else if (_statusCode == REDIRECTION)
+		{
+			this->_statusCode = 302;
+			startRedirection();
 			return ;
 		}
 
@@ -348,7 +351,18 @@ Client::startAutoindex()
 				_statusCode = 500;
 		}
 	}
+}
 
+void
+Client::startRedirection()
+{
+	setStatusMsg(_statusMap[getStatusCode()]);
+	m_resMsg += getHttpVersion() + " " + std::to_string(getStatusCode())  + " " + getStatusMsg() + CRLF;
+	m_resMsg += "Location : " + m_file.srcPath + "\r\n";
+	m_resMsg += "Content-type : text/html;charset=UTF-8\r\n";
+	m_resMsg += "Content-Length : 0\r\n";
+	m_resMsg += "Date : " + getDate() + CRLF;
+	m_totalBytes = m_resMsg.size();
 }
 
 const char *
@@ -444,7 +458,7 @@ Client::isValidTarget(std::string &target)
 		std::cout << "cgi!! : " << path << "\n";
 		return (200);
 	}
-	else if (target.compare(0, sizeof("/database/") - 1, "/database/") == SUCCESS)
+	if (target.compare(0, sizeof("/database/") - 1, "/database/") == SUCCESS)
 	{
 		m_file.srcPath = this->getCwdPath() + target;
 		std::cout << "download!! : " << path << "\n";
@@ -459,7 +473,12 @@ Client::isValidTarget(std::string &target)
 			{
 				path = this->getCwdPath() + "/"+ it->second.root;
 				std::cout << "!!path : " << path << std::endl;
-				// std::cout << "it->second.index.size() :" << it->second.index.size()  << "\n";
+				std::cout << "t->second.index.size() :" << it->second.index.size()  << "\n";
+				if (it->second.returnType == 301 && it->second.returnRoot != "")
+				{
+					m_file.srcPath = it->second.returnRoot;
+					return (REDIRECTION);
+				}
 				if (it->second.index.size() > 0 )
 				{
 					m_file.srcPath = path + "/" +  it->second.index[0];
