@@ -284,7 +284,7 @@ Connection::clientReadEvent()
 		//std::cout << "\n\n\nRequest \n" << ss.str() << "\n\n";
 		m_clientMap[currEvent->ident].reqParser.makeRequest(ss.str());
 		m_clientMap[currEvent->ident].status = Res::None;
-
+		std::cout <<" Request status : " << m_clientMap[currEvent->ident].reqParser.t_result.pStatus << "\n";
 		if (m_clientMap[currEvent->ident].reqParser.t_result.pStatus == Request::ParseComplete)
 		{
 			std::cerr <<GREEN << "client : " << currEvent->ident << "  => REQUEST : " << getMethodToStr(m_clientMap[currEvent->ident].reqParser.t_result.method )<< RESET<< std::endl;
@@ -299,7 +299,13 @@ Connection::clientReadEvent()
 				if (m_sessionMap.find(sessionId) != m_sessionMap.end())
 				{
 					m_sessionMap[sessionId].push_back(log);
-					logPrint(sessionId, m_sessionMap[sessionId]);
+					std::map<std::string, std::vector<Log> >::iterator it;
+					for (it = m_sessionMap.begin(); it != m_sessionMap.end(); ++it)
+					{
+						logPrint(it->first, it->second);
+						std::cout << "-----------------\n";
+					}
+					// logPrint(sessionId, m_sessionMap[sessionId]);
 				}
 				else
 				{
