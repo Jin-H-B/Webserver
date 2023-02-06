@@ -1,0 +1,17 @@
+[!]cookie exist
+[!]cookie exist
+SESSION LOG : webserv_rACGe7J1Y6 requested GET/ at Tue, 6 Feb 2023 12:51:04 GMT
+SESSION LOG : webserv_rACGe7J1Y6 requested GET/image.jpeg at Tue, 6 Feb 2023 12:51:04 GMT
+-----------------
+[!]cookie exist
+SESSION LOG : webserv_rACGe7J1Y6 requested GET/ at Tue, 6 Feb 2023 12:51:04 GMT
+SESSION LOG : webserv_rACGe7J1Y6 requested GET/image.jpeg at Tue, 6 Feb 2023 12:51:04 GMT
+SESSION LOG : webserv_rACGe7J1Y6 requested GET/upload at Tue, 6 Feb 2023 12:51:09 GMT
+-----------------
+[!]cookie exist
+SESSION LOG : webserv_rACGe7J1Y6 requested GET/ at Tue, 6 Feb 2023 12:51:04 GMT
+SESSION LOG : webserv_rACGe7J1Y6 requested GET/image.jpeg at Tue, 6 Feb 2023 12:51:04 GMT
+SESSION LOG : webserv_rACGe7J1Y6 requested GET/upload at Tue, 6 Feb 2023 12:51:09 GMT
+SESSION LOG : webserv_rACGe7J1Y6 requested POST/upload.pl at Tue, 6 Feb 2023 12:51:15 GMT
+-----------------
+handleErrorEvent : 9 errno is : 10
